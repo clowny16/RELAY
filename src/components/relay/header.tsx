@@ -123,7 +123,7 @@ export function Ticker() {
         </div>
         <div className="hidden sm:flex items-center gap-4 text-xs">
           <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary" aria-hidden />
+            <span className="w-1.5 h-1.5 rounded-full bg-highlight" aria-hidden />
             Free forever · No sign-up
           </span>
           <span className="hidden md:inline">Works offline</span>

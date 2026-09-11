@@ -91,7 +91,7 @@ export function Hero() {
             <ShieldCheck className="w-3.5 h-3.5" aria-hidden />
             100% Private
           </span>
-          <span className="inline-flex items-center gap-1.5 text-primary bg-accent-light/50 dark:bg-accent-light/20 border border-primary/25 rounded-full px-3 py-1 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1.5 text-highlight-foreground bg-highlight border border-highlight/60 rounded-full px-3 py-1 text-xs font-semibold">
             <InfinityIcon className="w-3.5 h-3.5" aria-hidden />
             Free Forever
           </span>

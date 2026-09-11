@@ -93,7 +93,7 @@ function statusPill(job: ConversionJob) {
   switch (job.status) {
     case "complete":
       return (
-        <span className="inline-flex items-center gap-1 text-xs text-primary font-bold">
+        <span className="inline-flex items-center gap-1 text-xs font-bold bg-highlight text-highlight-foreground px-2 py-0.5 rounded-full">
           <CheckCircle2 className="w-3.5 h-3.5" aria-hidden /> Done
           {job.finishedAt && job.startedAt ? ` in ${((job.finishedAt - job.startedAt) / 1000).toFixed(1)}s` : ""}
         </span>
@@ -309,8 +309,9 @@ export function JobCard({ job }: { job: ConversionJob }) {
           )}
         </div>
 
-        {/* right: actions */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        {/* right: status + actions */}
+        <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+          {statusPill(job)}
           {job.status === "complete" && (
             <>
               <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => setPreviewJob(job.id)}>

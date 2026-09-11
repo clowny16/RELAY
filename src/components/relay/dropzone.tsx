@@ -22,7 +22,7 @@ export function Dropzone() {
       if (files.length === 0) return;
       setView("convert");
       const { added, rejected } = await addFiles(files);
-      if (added > 0) toast.success(`${added} file${added > 1 ? "s" : ""} added — type detected`, { description: "Pick an output format on each card, then hit Convert." });
+      if (added > 0) toast.success(`${added} file${added > 1 ? "s" : ""} added — type detected`, { description: "Pick an output format in the yellow panel, then hit Convert." });
       rejected.slice(0, 3).forEach((r) => toast.error(`Skipped: ${r.name}`, { description: r.reason }));
       if (rejected.length > 3) toast.warning(`${rejected.length - 3} more files skipped`);
     },

@@ -50,8 +50,16 @@ export interface HistoryItem {
   at: number;
 }
 
+/** A file that is being inspected right now — type detection in progress. */
+export interface ScanningFile {
+  id: string;
+  name: string;
+  size: number;
+}
+
 interface QueueState {
   jobs: ConversionJob[];
+  scanning: ScanningFile[];
   history: HistoryItem[];
   paused: boolean;
   filter: "all" | "active" | "pending" | "complete" | "failed";
@@ -62,6 +70,7 @@ interface QueueState {
   setOption: (id: string, key: string, value: unknown) => void;
   startJob: (id: string) => void;
   startAll: () => void;
+  startGroup: (ids: string[]) => void;
   cancelJob: (id: string) => void;
   retryJob: (id: string) => void;
   removeJob: (id: string) => void;
@@ -75,9 +84,14 @@ interface QueueState {
   clearHistory: () => void;
   toggleFavorite: (input: string, output: string) => void;
   _tick: () => void;
+  _drain: (groupId: string | null) => void;
 }
 
 let jobCounter = 0;
+let scanCounter = 0;
+let groupCounter = 0;
+/** jobId → group id: remembers which detect-panel group a job was started with. */
+const jobGroups = new Map<string, string>();
 
 async function sha256Hex(blob: Blob): Promise<string> {
   try {
@@ -120,6 +134,7 @@ export function outputName(fileName: string, ext: string): string {
 
 export const useQueueStore = create<QueueState>((set, get) => ({
   jobs: [],
+  scanning: [],
   history: [],
   paused: false,
   filter: "all",
@@ -135,10 +150,23 @@ export const useQueueStore = create<QueueState>((set, get) => ({
     const rejected: { name: string; reason: string }[] = [];
     if (overflow > 0) rejected.push({ name: `${overflow} file(s)`, reason: `Batch limit reached (${limits.maxBatch} files at once — clear finished files to add more).` });
 
+    // Show what we're doing immediately: every accepted file appears as a
+    // "detecting…" entry before its type is known.
+    const scanEntries: ScanningFile[] = accepted.map((file) => ({
+      id: `s${++scanCounter}-${Date.now()}`,
+      name: file.name,
+      size: file.size,
+    }));
+    set({ scanning: [...get().scanning, ...scanEntries] });
+
     const newJobs: ConversionJob[] = [];
     const pendingPair = useUiStore.getState().pendingPair;
-    for (const file of accepted) {
+    for (let i = 0; i < accepted.length; i++) {
+      const file = accepted[i];
+      const scanId = scanEntries[i].id;
       const detection = await detectFormat(file);
+      // this file's "detecting" entry is done — remove it
+      set({ scanning: get().scanning.filter((s) => s.id !== scanId) });
       if (!detection.formatId) {
         rejected.push({ name: file.name, reason: "Unsupported format — we couldn't identify this file type." });
         continue;
@@ -156,7 +184,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
           : null;
       const target = presetTarget ?? defaultTargetFor(detection.formatId)!;
       const route = getRoute(detection.formatId, target)!;
-      newJobs.push({
+      const job: ConversionJob = {
         id: `j${++jobCounter}-${Date.now()}`,
         file,
         fileName: file.name,
@@ -167,12 +195,16 @@ export const useQueueStore = create<QueueState>((set, get) => ({
         status: "waiting",
         progress: 0,
         stage: "queued",
-      });
+      };
+      newJobs.push(job);
+      // Progressive: the card (with its detected type) appears the moment the
+      // type is known instead of after the whole batch is scanned.
+      set({ jobs: [...get().jobs, job] });
     }
-    set({ jobs: [...get().jobs, ...newJobs], maxConcurrent: limits.maxConcurrent });
+    set({ maxConcurrent: limits.maxConcurrent });
     if (newJobs.length && pendingPair) useUiStore.getState().setPendingPair(null);
-    // Files wait in "Ready" state — the user picks the output format on each
-    // card, then hits Convert (or Convert All). No surprise auto-conversions.
+    // Files wait in "Ready" state — the user picks the output format (in the
+    // detect panel or on each card), then hits Convert. No surprise conversions.
     return { added: newJobs.length, rejected };
   },
 
@@ -288,17 +320,31 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       })
       .finally(() => {
         set((state) => ({ jobs: state.jobs.map((j) => (j.id === id ? { ...j, runHandle: undefined } : j)) }));
-        setTimeout(() => get().startAll(), 30);
+        // drain the queue this job belongs to (its detect-panel group, or all)
+        setTimeout(() => get()._drain(jobGroups.get(id) ?? null), 30);
       });
   },
 
-  startAll: () => {
+  _drain: (groupId) => {
     const { jobs, paused } = get();
     if (paused) return;
     const running = jobs.filter((j) => j.runHandle).length;
     const { maxConcurrent } = deviceLimits();
-    const candidates = jobs.filter((j) => j.status === "waiting" && !j.runHandle).slice(0, Math.max(0, maxConcurrent - running));
+    const candidates = jobs
+      .filter((j) => j.status === "waiting" && !j.runHandle && (!groupId || jobGroups.get(j.id) === groupId))
+      .slice(0, Math.max(0, maxConcurrent - running));
     candidates.forEach((j) => get().startJob(j.id));
+  },
+
+  startAll: () => {
+    jobGroups.clear();
+    get()._drain(null);
+  },
+
+  startGroup: (ids) => {
+    const groupId = `g${++groupCounter}`;
+    ids.forEach((id) => jobGroups.set(id, groupId));
+    get()._drain(groupId);
   },
 
   cancelJob: (id) => {

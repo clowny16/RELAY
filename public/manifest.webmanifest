@@ -4,8 +4,8 @@
   "description": "Convert files privately, right in your browser. Zero uploads.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f4f3f1",
-  "theme_color": "#a9473c",
+  "background_color": "#ffffff",
+  "theme_color": "#ff4f00",
   "icons": [
     {
       "src": "/icon.svg",

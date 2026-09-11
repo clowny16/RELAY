@@ -60,3 +60,23 @@ Work Log:
 Stage Summary:
 - New UX flow verified E2E in browser: drop CSV → Detected: CSV Data + chips (JSON/JSONL/XLSX/TSV) → picked XLSX → button label updated → converted → Save XLSX; batch: 3 files waiting → Convert All → all Done
 - Mobile 390px: steps stack, cards wrap, no page errors
+
+---
+Task ID: 4
+Agent: Z.ai Code (main)
+Task: (a) Fix reported React hydration error; (b) apply new brand palette (Pure Black #111111 / Crisp White #FFFFFF / International Orange #FF4F00 / Cyber Yellow #FFD400); (c) make the app visibly show what it is doing after file selection and offer output-format options post-detection
+
+Work Log:
+- Hydration root cause: public/sw.js registered in dev and served stale cached HTML/JS chunks (stale-while-revalidate + cached "/" shell). Fix: providers.tsx now registers SW only in production; in dev it unregisters existing SWs and wipes CacheStorage. sw.js cache bumped to relay-v3. Footer year wrapped in suppressHydrationWarning (Date-based SSR risk). Verified fresh loads: zero hydration errors, zero console errors
+- Palette: globals.css rewritten — light theme on crisp white #FFFFFF w/ #111111 text, dark theme on pure black #111111 w/ white text; --primary #FF4F00 everywhere; new --highlight/--highlight-foreground tokens (#FFD400 / #111111) mapped to bg-highlight/text-highlight utilities; chart/ring/border tokens re-anchored to orange/neutral gray; orange-tinted accent-light (#ffede2 / #331c0a)
+- Palette rollout: layout.tsx viewport themeColor (#ffffff/#111111), manifest.webmanifest (bg #ffffff, theme #ff4f00), icon.svg redrawn (black tile, orange arrow, yellow underline)
+- Cyber Yellow accents: Hero "Free Forever" badge, Ticker dot, DetectPanel icon tile + "Detected" step chip, JobCard "Done in X.Xs" chip
+- Show-what-we're-doing: queue-store gains ScanningFile[] state — addFiles pushes "detecting…" entries immediately, removes each as its type is detected, and commits jobs progressively (cards appear one by one)
+- New DetectPanel (detect-panel.tsx): while scanning shows live per-file "Detecting file type…" rows; after detection groups waiting jobs by detected type and asks "N files detected — what format do you want?" with output-format pills + "Convert N to <FMT>" per group, dismissable, re-opens on new scans
+- Group-scoped conversions: queue-store adds startGroup(ids) + _drain(groupId) with jobId→group map so converting one group no longer hijacks other waiting groups (startAll still drains everything); startJob's finally-drain respects its own group
+- Bug fix: JobCard statusPill was defined but never rendered — now shown in the actions row (Waiting / Done-in / Failed chips)
+- Dropzone toast copy: "Pick an output format in the yellow panel, then hit Convert."
+
+Stage Summary:
+- E2E verified via Agent Browser: upload CSV+TXT → panel listed both with live detecting rows → picked XLSX for CSV group → "Convert 1 to XLSX" ran ONLY that group (TXT stayed Waiting with visible pill) → picked MD for TXT → converted → both cards show yellow Done chips + Save buttons; history tray records both; footer flush at bottom
+- Light/dark verified (white #FFFFFF / black #111111 with orange+yellow accents), mobile 390px verified, lint + tsc clean, dev.log clean, zero console/hydration errors

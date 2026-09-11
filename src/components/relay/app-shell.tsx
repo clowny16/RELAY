@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Header, Ticker } from "./header";
 import { Dropzone } from "./dropzone";
+import { DetectPanel } from "./detect-panel";
 import { QueueSection } from "./queue-section";
 import { Hero, BentoGrid } from "./bento";
 import { HistoryTray, Footer } from "./footer";
@@ -20,6 +21,7 @@ function ConvertView() {
     <div className="flex flex-col gap-8">
       <Hero />
       <Dropzone />
+      <DetectPanel />
       <QueueSection />
       <BentoGrid />
       <HistoryTray />

@@ -33,7 +33,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
       // stats are polled by the ticker component; this keeps the pool warm
     });
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      if (process.env.NODE_ENV === "production") {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+      } else {
+        // Dev mode: a previously installed service worker serves stale cached
+        // HTML/JS chunks, which triggers React hydration mismatches. Make sure
+        // none is left controlling the page and wipe old caches.
+        navigator.serviceWorker
+          .getRegistrations()
+          .then((regs) => regs.forEach((r) => void r.unregister()))
+          .catch(() => {});
+        if ("caches" in window) {
+          caches
+            .keys()
+            .then((keys) => keys.forEach((k) => void caches.delete(k)))
+            .catch(() => {});
+        }
+      }
     }
   }, []);
 

@@ -68,7 +68,7 @@ export function Footer() {
             Files are processed on your device, not ours
           </span>
         </div>
-        <div className="text-xs text-muted-foreground">Free forever · No account · No uploads · © {new Date().getFullYear()} RELAY</div>
+        <div className="text-xs text-muted-foreground" suppressHydrationWarning>Free forever · No account · No uploads · © {new Date().getFullYear()} RELAY</div>
       </div>
     </footer>
   );
