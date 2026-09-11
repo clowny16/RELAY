@@ -59,7 +59,7 @@ function PdfPreview({ buffer }: { buffer: ArrayBuffer }) {
     };
   }, [buffer]);
   if (!url) return <div className="h-64 bg-surface-high rounded-lg animate-pulse" />;
-  // eslint-disable-next-line @next/next/no-img-element
+   
   return <img src={url} alt="PDF first page preview" className="max-h-[60vh] rounded-lg border shadow mx-auto" />;
 }
 
@@ -154,7 +154,7 @@ export function PreviewDialog() {
                   {isImage && (
                 <div className="flex flex-col items-center gap-3">
                   <div className="overflow-auto max-w-full max-h-[55vh] relay-scroll rounded-lg border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    { }
                     <img
                       src={job.result!.url}
                       alt={`Converted output preview of ${job.fileName}`}

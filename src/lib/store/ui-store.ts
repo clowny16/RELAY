@@ -3,7 +3,7 @@
 
 import { create } from "zustand";
 
-export type ViewId = "convert" | "tools" | "formats" | "pricing" | "privacy";
+export type ViewId = "convert" | "tools" | "formats" | "privacy";
 
 export interface ToolPanelState {
   panel: string;
@@ -15,7 +15,6 @@ interface UiState {
   formatDetail: string | null;
   toolPanel: ToolPanelState | null;
   searchOpen: boolean;
-  authOpen: boolean;
   previewJobId: string | null;
   extractorFileId: string | null;
   pendingPair: { input: string; output: string } | null;
@@ -23,7 +22,6 @@ interface UiState {
   openFormat: (id: string | null) => void;
   openToolPanel: (panel: string | null) => void;
   setSearchOpen: (open: boolean) => void;
-  setAuthOpen: (open: boolean) => void;
   setPreviewJob: (id: string | null) => void;
   setExtractorFile: (id: string | null) => void;
   setPendingPair: (pair: { input: string; output: string } | null) => void;
@@ -34,7 +32,6 @@ export const useUiStore = create<UiState>((set) => ({
   formatDetail: null,
   toolPanel: null,
   searchOpen: false,
-  authOpen: false,
   previewJobId: null,
   extractorFileId: null,
   pendingPair: null,
@@ -42,7 +39,6 @@ export const useUiStore = create<UiState>((set) => ({
   openFormat: (formatDetail) => set({ view: "formats", formatDetail }),
   openToolPanel: (panel) => set({ view: "tools", toolPanel: panel ? { panel, open: true } : null }),
   setSearchOpen: (searchOpen) => set({ searchOpen }),
-  setAuthOpen: (authOpen) => set({ authOpen }),
   setPreviewJob: (previewJobId) => set({ previewJobId }),
   setExtractorFile: (extractorFileId) => set({ extractorFileId }),
   setPendingPair: (pendingPair) => set({ pendingPair, view: "convert" }),

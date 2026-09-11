@@ -21,3 +21,26 @@ Stage Summary:
 - All core conversions REAL and browser-verified; unsupported formats honestly labeled "coming soon"
 - Architecture: registry-driven, engines modular + lazy-loaded, heavy work in Web Worker pool
 - Key artifacts: src/lib/conversion/*, src/components/relay/*, src/lib/store/*, src/app/api/{auth,billing}/*
+
+---
+Task ID: 2
+Agent: Z.ai Code (main)
+Task: Simplify + polish RELAY UI; remove accounts (fully free app)
+
+Work Log:
+- Deleted auth infrastructure: src/lib/store/auth-store.ts, src/components/relay/auth-dialog.tsx, src/app/api/auth/*, src/app/api/billing/*
+- queue-store: replaced planLimits() with deviceLimits() (200-file batches, 2-4 parallel based on CPU cores) — free forever, no tiers
+- ui-store: removed authOpen + "pricing" ViewId; providers.tsx no longer loads auth
+- prisma: removed User model, pushed schema — app is now 100% browser-only, zero server data
+- header.tsx rewritten: simple logo, friendly privacy pill, nav (Convert/Tools/Formats/Privacy), search, theme dropdown; removed account menu, plan badge, buffered chip, version badge; Ticker now a plain-language reassurance strip
+- dropzone: removed telemetry crosshairs/jargon, plain copy "Drop files here to convert", friendly format pills, bigger CTA buttons (44px targets)
+- queue-section: "Your Files", filters All/Converting/Waiting/Done/Failed (auto-shown only when non-empty), toolbar "Convert All"/"Pause"/"Zip & Save All"/"Clear Finished"
+- job-card: Done/Failed/Waiting/Cancel plain labels, stage text (Preparing…/Converting…/Finishing…), removed hex from format badge (kept tooltip), unified button styling
+- bento: friendly cards (parallel power, memory, "Uploaded to a server: 0 bytes — ever"), Hero with 100% Private / Free Forever / No Sign-up badges
+- footer/history: plain copy; footer "Free forever · No account · No uploads"
+- info-views: deleted PricingView entirely; privacy page rewritten (no accounts exist at all), simplified flow diagram
+- Fixed TS stage comparison error; lint + tsc clean; removed unused prisma User
+
+Stage Summary:
+- RELAY is now a no-account, no-pricing, 100% free client-side converter
+- Agent Browser E2E verified: CSV→JSON conversion (correct typed output in preview), job card states, filters, dark mode, mobile 390px layout, sticky footer, zero console errors

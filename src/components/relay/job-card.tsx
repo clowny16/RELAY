@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQueueStore, type ConversionJob, formatBytes, outputName } from "@/lib/store/queue-store";
 import { getAvailableRoutes, getRoute } from "@/lib/conversion/registry";
-import { CATEGORIES } from "@/lib/conversion/formats";
 import { getFormat } from "@/lib/conversion/formats";
 import { jobOptionsSchema } from "@/lib/store/queue-store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -92,25 +91,25 @@ function statusPill(job: ConversionJob) {
   switch (job.status) {
     case "complete":
       return (
-        <span className="inline-flex items-center gap-1 font-mono text-[11px] text-primary font-bold">
-          <CheckCircle2 className="w-3.5 h-3.5" aria-hidden /> DONE
-          {job.finishedAt && job.startedAt ? ` (${((job.finishedAt - job.startedAt) / 1000).toFixed(2)}s)` : ""}
+        <span className="inline-flex items-center gap-1 text-xs text-primary font-bold">
+          <CheckCircle2 className="w-3.5 h-3.5" aria-hidden /> Done
+          {job.finishedAt && job.startedAt ? ` in ${((job.finishedAt - job.startedAt) / 1000).toFixed(1)}s` : ""}
         </span>
       );
     case "failed":
       return (
-        <span className="inline-flex items-center gap-1 font-mono text-[11px] text-destructive font-bold">
-          <XCircle className="w-3.5 h-3.5" aria-hidden /> FAILED
+        <span className="inline-flex items-center gap-1 text-xs text-destructive font-bold">
+          <XCircle className="w-3.5 h-3.5" aria-hidden /> Failed
         </span>
       );
     case "cancelled":
-      return <span className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground font-bold">CANCELLED</span>;
+      return <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-bold">Cancelled</span>;
     case "waiting":
-      return <span className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground">WAITING</span>;
+      return <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">Waiting</span>;
     default:
       return (
-        <span className="inline-flex items-center gap-1 font-mono text-[11px] text-primary font-semibold">
-          <Loader2 className="w-3 h-3 animate-spin" aria-hidden /> {job.stage?.toUpperCase()}
+        <span className="inline-flex items-center gap-1 text-xs text-primary font-semibold">
+          <Loader2 className="w-3 h-3 animate-spin" aria-hidden /> {job.stage === "queued" ? "Starting…" : job.stage === "preparing" ? "Preparing…" : job.stage === "finalizing" ? "Finishing…" : "Converting…"}
         </span>
       );
   }
@@ -153,7 +152,7 @@ export function JobCard({ job }: { job: ConversionJob }) {
           </div>
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono text-sm font-bold truncate max-w-[16rem] sm:max-w-xs" title={job.fileName}>
+              <span className="text-sm font-semibold truncate max-w-[16rem] sm:max-w-xs" title={job.fileName}>
                 {job.fileName}
               </span>
               <span
@@ -163,14 +162,13 @@ export function JobCard({ job }: { job: ConversionJob }) {
                     ? "bg-destructive/10 border-destructive/30 text-destructive"
                     : "bg-accent-light/40 dark:bg-accent-light/20 border-primary/20 text-primary"
                 )}
-                title={job.detection.signatureHex ? `Signature: ${job.detection.signatureHex}` : undefined}
+                title={job.detection.signatureHex ? `Detected file signature: ${job.detection.signatureHex}` : undefined}
               >
-                {fmt?.name.toUpperCase() ?? "UNKNOWN"}
-                {job.detection.signatureHex ? ` · ${job.detection.signatureHex.slice(0, 23)}` : ""}
+                {fmt?.name.toUpperCase() ?? "Unknown"}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground font-mono text-[11px] mt-1 flex-wrap">
-              <span>INPUT: {formatBytes(job.size)}</span>
+            <div className="flex items-center gap-2 text-muted-foreground text-xs mt-1 flex-wrap">
+              <span>{formatBytes(job.size)}</span>
               {meta.width ? (
                 <>
                   <span aria-hidden>•</span>
@@ -193,7 +191,7 @@ export function JobCard({ job }: { job: ConversionJob }) {
               ) : null}
               {job.detection.mismatch && (
                 <span className="inline-flex items-center gap-1 text-destructive font-semibold">
-                  <AlertTriangle className="w-3 h-3" aria-hidden /> extension mismatch — using detected type
+                  <AlertTriangle className="w-3 h-3" aria-hidden /> file looks like a different type — using what we detected
                 </span>
               )}
               {route?.browserDependent && !job.result && (
@@ -213,7 +211,7 @@ export function JobCard({ job }: { job: ConversionJob }) {
 
         {/* center: output selector + savings */}
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <span className="font-mono text-[11px] text-muted-foreground font-medium hidden md:inline">{job.status === "complete" ? "OUTPUT:" : "CONVERT TO:"}</span>
+          <span className="text-xs text-muted-foreground font-medium hidden md:inline">{job.status === "complete" ? "Saved as:" : "Convert to:"}</span>
           <Select
             value={job.target}
             onValueChange={(v) => setTarget(job.id, v)}
@@ -233,7 +231,7 @@ export function JobCard({ job }: { job: ConversionJob }) {
           </Select>
 
           {job.status === "complete" && outBytes > 0 && (
-            <div className="bg-accent-light/50 dark:bg-accent-light/20 border border-primary/30 text-primary font-mono text-[11px] px-2 py-1.5 rounded flex items-center gap-1 font-semibold">
+            <div className="bg-accent-light/50 dark:bg-accent-light/20 border border-primary/30 text-primary text-xs px-2 py-1.5 rounded-lg flex items-center gap-1 font-semibold">
               <TrendingDown className="w-3.5 h-3.5" aria-hidden />
               <span>
                 {formatBytes(outBytes)}
@@ -247,36 +245,36 @@ export function JobCard({ job }: { job: ConversionJob }) {
         <div className="flex items-center gap-1.5 shrink-0">
           {job.status === "complete" && (
             <>
-              <Button variant="outline" size="sm" className="h-8 font-mono text-[11px] gap-1" onClick={() => setPreviewJob(job.id)}>
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => setPreviewJob(job.id)}>
                 <Eye className="w-3.5 h-3.5" aria-hidden /> Preview
               </Button>
-              <Button size="sm" className="h-8 font-mono text-[11px] font-bold gap-1" onClick={() => downloadJob(job.id)}>
+              <Button size="sm" className="h-8 text-xs font-bold gap-1.5" onClick={() => downloadJob(job.id)}>
                 <Download className="w-3.5 h-3.5" aria-hidden /> Save {job.result!.ext.toUpperCase()}
               </Button>
             </>
           )}
           {active && (
-            <Button variant="outline" size="sm" className="h-8 font-mono text-[11px] gap-1 hover:text-destructive hover:border-destructive/40" onClick={() => cancelJob(job.id)}>
-              <Square className="w-3.5 h-3.5" aria-hidden /> Abort
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1 hover:text-destructive hover:border-destructive/40" onClick={() => cancelJob(job.id)}>
+              <Square className="w-3.5 h-3.5" aria-hidden /> Cancel
             </Button>
           )}
           {(job.status === "waiting" || job.status === "paused") && (
-            <Button size="sm" className="h-8 font-mono text-[11px] font-bold gap-1" onClick={convert}>
+            <Button size="sm" className="h-8 text-xs font-bold gap-1.5" onClick={convert}>
               <Play className="w-3.5 h-3.5" aria-hidden /> Convert
             </Button>
           )}
           {(job.status === "failed" || job.status === "cancelled") && (
             <>
-              <Button size="sm" variant="outline" className="h-8 font-mono text-[11px] gap-1" onClick={() => retryJob(job.id)}>
+              <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={() => retryJob(job.id)}>
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden /> Retry
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 font-mono text-[11px] gap-1 text-destructive" onClick={() => removeJob(job.id)} aria-label="Remove file">
+              <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 text-destructive" onClick={() => removeJob(job.id)} aria-label="Remove file">
                 <Trash2 className="w-3.5 h-3.5" aria-hidden />
               </Button>
             </>
           )}
           {(job.status === "complete" || job.status === "waiting") && (
-            <Button variant="ghost" size="sm" className="h-8 font-mono text-[11px] text-muted-foreground" onClick={() => removeJob(job.id)} aria-label="Remove file">
+            <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => removeJob(job.id)} aria-label="Remove file">
               <Trash2 className="w-3.5 h-3.5" aria-hidden />
             </Button>
           )}
@@ -302,7 +300,7 @@ export function JobCard({ job }: { job: ConversionJob }) {
       {schema.length > 0 && (
         <Collapsible open={advanced} onOpenChange={setAdvanced}>
           <div className="flex items-center gap-2">
-            <CollapsibleTrigger className="flex items-center gap-1 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+            <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
               <SlidersHorizontal className="w-3 h-3" aria-hidden />
               Advanced Settings
             </CollapsibleTrigger>
@@ -377,12 +375,12 @@ export function JobCard({ job }: { job: ConversionJob }) {
           {active && (
             <>
               <Progress value={job.progress < 0 ? undefined : job.progress * 100} className="h-2" />
-              <div className="flex items-center justify-between font-mono text-[11px] text-muted-foreground">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <span className="text-primary font-bold">{job.progress >= 0 ? `${Math.round(job.progress * 100)}% COMPLETE` : "PROCESSING"}</span>
+                  <span className="text-primary font-bold">{job.progress >= 0 ? `${Math.round(job.progress * 100)}%` : "Working…"}</span>
                   <span className="hidden sm:inline">{job.detail ?? job.stage}</span>
                 </div>
-                <span className="hidden md:inline">100% local · 0 bytes uploaded</span>
+                <span className="hidden md:inline">processing on your device</span>
               </div>
             </>
           )}
@@ -398,12 +396,12 @@ export function JobCard({ job }: { job: ConversionJob }) {
       )}
 
       {job.status === "waiting" && (
-        <div className="flex items-center justify-between font-mono text-[11px] text-muted-foreground pt-1 border-t border-border/60">
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border/60">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" aria-hidden />
-            STANDBY // {CATEGORIES[fmt?.category ?? "document"]?.label ?? "Engine"} engine ready
+            Ready to convert
           </span>
-          <span className="hidden md:inline">{route?.note ? route.note.slice(0, 64) : "queued locally"}</span>
+          <span className="hidden md:inline">{route?.note ? route.note.slice(0, 64) : "waiting in queue"}</span>
         </div>
       )}
     </div>

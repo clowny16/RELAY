@@ -7,10 +7,9 @@ import { QueueSection } from "./queue-section";
 import { Hero, BentoGrid } from "./bento";
 import { HistoryTray, Footer } from "./footer";
 import { PreviewDialog } from "./preview-dialog";
-import { AuthDialog } from "./auth-dialog";
 import { SearchDialog } from "./search-dialog";
 import { ToolsView } from "./tools-view";
-import { FormatsView, PricingView, PrivacyView } from "./info-views";
+import { FormatsView, PrivacyView } from "./info-views";
 import { useUiStore } from "@/lib/store/ui-store";
 import { toast } from "sonner";
 import { ArrowRight, X } from "lucide-react";
@@ -32,20 +31,20 @@ function PendingPairBanner() {
   const { pendingPair, setPendingPair } = useUiStore();
   useEffect(() => {
     if (pendingPair) {
-      toast(`Converter set to ${pendingPair.input.toUpperCase()} → ${pendingPair.output.toUpperCase()}`, {
-        description: "Drop your files below and they'll target this output.",
+      toast(`Output set to ${formatLabel(pendingPair.output).toUpperCase()}`, {
+        description: `Drop your ${formatLabel(pendingPair.input).toUpperCase()} files below and they'll be converted automatically.`,
         duration: 5000,
       });
     }
   }, [pendingPair]);
   if (!pendingPair) return null;
   return (
-    <div className="flex items-center justify-between gap-2 bg-accent-light/40 dark:bg-accent-light/20 border border-primary/30 text-primary rounded-lg px-4 py-2.5">
-      <span className="flex items-center gap-2 font-mono text-xs font-semibold">
+    <div className="flex items-center justify-between gap-2 bg-accent-light/40 dark:bg-accent-light/20 border border-primary/30 text-primary rounded-xl px-4 py-3">
+      <span className="flex items-center gap-2 text-sm font-semibold">
         <ArrowRight className="w-4 h-4" aria-hidden />
-        TARGET LOCKED: {formatLabel(pendingPair.input).toUpperCase()} → {formatLabel(pendingPair.output).toUpperCase()}
+        Converting to {formatLabel(pendingPair.output).toUpperCase()} — drop your files below
       </span>
-      <button onClick={() => setPendingPair(null)} aria-label="Clear target" className="hover:opacity-70">
+      <button onClick={() => setPendingPair(null)} aria-label="Clear target" className="hover:opacity-70 min-h-[44px] min-w-[44px] flex items-center justify-center">
         <X className="w-4 h-4" />
       </button>
     </div>
@@ -69,13 +68,11 @@ export function AppShell() {
           )}
           {view === "tools" && <ToolsView />}
           {view === "formats" && <FormatsView />}
-          {view === "pricing" && <PricingView />}
           {view === "privacy" && <PrivacyView />}
         </div>
       </main>
       <Footer />
       <PreviewDialog />
-      <AuthDialog />
       <SearchDialog />
     </div>
   );

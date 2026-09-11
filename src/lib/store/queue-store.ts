@@ -6,7 +6,6 @@ import type { Detection, OptionField, ProgressInfo, Stage } from "@/lib/conversi
 import { detectFormat } from "@/lib/conversion/detection";
 import { getAvailableRoutes, defaultOptions, defaultTargetFor, getRoute } from "@/lib/conversion/registry";
 import { runConversion, type RunHandle } from "@/lib/conversion/runner";
-import { useAuthStore } from "./auth-store";
 
 export type JobStatus = "waiting" | "preparing" | "converting" | "finalizing" | "complete" | "failed" | "cancelled" | "paused";
 
@@ -95,11 +94,12 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-function planLimits() {
-  const plan = useAuthStore.getState().user?.plan ?? "free";
+/** Free forever — no accounts, no tiers. Limits are based on the device, not a plan. */
+function deviceLimits() {
+  const cores = typeof navigator !== "undefined" ? navigator.hardwareConcurrency || 4 : 4;
   return {
-    maxBatch: plan === "free" ? 10 : 100,
-    maxConcurrent: plan === "free" ? 2 : 4,
+    maxBatch: 200,
+    maxConcurrent: Math.max(2, Math.min(4, Math.floor(cores / 2))),
   };
 }
 
@@ -126,13 +126,13 @@ export const useQueueStore = create<QueueState>((set, get) => ({
   maxConcurrent: 2,
 
   addFiles: async (files) => {
-    const limits = planLimits();
+    const limits = deviceLimits();
     const current = get().jobs;
     const room = Math.max(0, limits.maxBatch - current.filter((j) => j.status === "waiting" || j.status === "paused").length);
     const accepted = files.slice(0, room);
     const overflow = files.length - accepted.length;
     const rejected: { name: string; reason: string }[] = [];
-    if (overflow > 0) rejected.push({ name: `${overflow} file(s)`, reason: `Batch limit reached (Free tier: ${limits.maxBatch} files). Upgrade to Pro for larger batches.` });
+    if (overflow > 0) rejected.push({ name: `${overflow} file(s)`, reason: `Batch limit reached (${limits.maxBatch} files at once — clear finished files to add more).` });
 
     const newJobs: ConversionJob[] = [];
     for (const file of accepted) {
@@ -286,7 +286,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
     const { jobs, paused } = get();
     if (paused) return;
     const running = jobs.filter((j) => j.runHandle).length;
-    const { maxConcurrent } = planLimits();
+    const { maxConcurrent } = deviceLimits();
     const candidates = jobs.filter((j) => j.status === "waiting" && !j.runHandle).slice(0, Math.max(0, maxConcurrent - running));
     candidates.forEach((j) => get().startJob(j.id));
   },

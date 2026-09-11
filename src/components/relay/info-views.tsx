@@ -5,7 +5,6 @@ import { CATEGORIES } from "@/lib/conversion/formats";
 import { FORMATS, getFormat, formatLabel } from "@/lib/conversion/formats";
 import { getRoutes, getAvailableRoutes, getInputsFor, getSupportedFormatIds, CONVERSIONS, TOOLS } from "@/lib/conversion/registry";
 import { useUiStore } from "@/lib/store/ui-store";
-import { useAuthStore } from "@/lib/store/auth-store";
 import { useQueueStore } from "@/lib/store/queue-store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +43,7 @@ export function FormatsView() {
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Format Matrix</h1>
         <p className="text-muted-foreground mt-1">
-          Convert hundreds of file formats with <span className="text-foreground font-medium">intelligent compatibility matching</span> — only real, working pipelines are listed. No fake buttons, ever.
+          Convert hundreds of file formats — <span className="text-foreground font-medium">only real, working conversions are listed</span>. No fake buttons, ever.
         </p>
       </div>
 
@@ -213,102 +212,6 @@ function FormatDetail({ id }: { id: string }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Pricing                                                             */
-/* ------------------------------------------------------------------ */
-
-const PLANS = [
-  {
-    id: "free",
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    blurb: "Everything you need for private, everyday conversion.",
-    features: ["100% local processing", "All core conversion engines", "Up to 10 files per batch", "2 parallel conversions", "Archive extraction", "PWA offline mode"],
-    cta: "You're on Free",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "$9",
-    period: "/month",
-    blurb: "For heavy local workloads — bigger batches, more parallelism.",
-    features: ["Everything in Free", "Up to 100 files per batch", "4 parallel conversions", "Conversion history metadata", "Saved preferences", "Priority engine updates"],
-    cta: "Upgrade to Pro",
-    highlight: true,
-  },
-  {
-    id: "business",
-    name: "Business",
-    price: "$29",
-    period: "/month",
-    blurb: "Teams that need auditability without cloud file storage.",
-    features: ["Everything in Pro", "Team license seats", "Priority support", "Self-hosted deployment guide", "Custom engine requests"],
-    cta: "Upgrade to Business",
-  },
-];
-
-export function PricingView() {
-  const { user, setPlan } = useAuthStore();
-  const setAuthOpen = useUiStore((s) => s.setAuthOpen);
-
-  const choose = async (id: string) => {
-    if (!user) {
-      toast.info("Create a free account first", { description: "Plans attach to an account. Your files still never leave your device." });
-      setAuthOpen(true);
-      return;
-    }
-    if (user.plan === id) return;
-    try {
-      await setPlan(id as "free" | "pro" | "business");
-      toast.success(`Plan set to ${id.toUpperCase()}`, { description: "Demo billing — no payment was processed." });
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Pricing</h1>
-        <p className="text-muted-foreground mt-2">
-          Processing is local, so plans unlock capacity — never uploads. <span className="text-foreground font-medium">The Pro subscription does not require sending us your files.</span>
-        </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-        {PLANS.map((plan) => {
-          const current = user?.plan === plan.id;
-          return (
-            <div key={plan.id} className={cn("bg-surface border rounded-xl p-6 flex flex-col gap-4 shadow-sm", plan.highlight ? "border-primary/50 ring-1 ring-primary/20" : "border-border")}>
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold text-lg">{plan.name}</h2>
-                {current && <Badge className="bg-primary text-primary-foreground font-mono text-[10px]">CURRENT</Badge>}
-              </div>
-              <div>
-                <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
-                <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">{plan.blurb}</p>
-              <ul className="flex flex-col gap-2 text-sm">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" aria-hidden />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Button variant={plan.highlight ? "default" : "outline"} disabled={current} onClick={() => void choose(plan.id)} className="mt-auto">
-                {current ? "Active plan" : plan.cta}
-              </Button>
-            </div>
-          );
-        })}
-      </div>
-      <p className="text-center text-xs text-muted-foreground">Demo billing environment — plan changes are instant and no payment is processed.</p>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Privacy                                                             */
 /* ------------------------------------------------------------------ */
 
@@ -329,15 +232,15 @@ export function PrivacyView() {
         <p className="text-sm text-muted-foreground">
           When you drop a file, it is read with the browser File API, handed to a Web Worker or a WebAssembly engine inside your own browser tab, and the converted result is
           written back to a local Blob. There is <span className="text-foreground font-medium">no upload endpoint that receives your files — the code for it does not exist</span>.
-          Account data (email, plan) is stored on our server; user file contents never are.
+          We don&apos;t even have accounts, so there is nothing to sign up for and no personal data to store.
         </p>
-        <pre className="bg-surface-low border border-border rounded-lg p-4 font-mono text-[11px] overflow-x-auto relay-scroll">{`Account data            Your file
-     ↓                      ↓
-Auth / Billing          Browser
-     ↓                      ↓
-Plan preferences only   Local conversion engine
-                            ↓
-                        Downloaded result`}</pre>
+        <pre className="bg-surface-low border border-border rounded-lg p-4 font-mono text-[11px] overflow-x-auto relay-scroll">{`Your file
+     ↓
+Your browser (never leaves your device)
+     ↓
+Local conversion engine
+     ↓
+Downloaded result`}</pre>
       </div>
 
       <div className="bg-surface border border-border rounded-xl p-6 flex flex-col gap-3 shadow-sm">

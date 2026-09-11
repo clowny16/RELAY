@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQueueStore, formatBytes } from "@/lib/store/queue-store";
 import { getPoolStats } from "@/lib/conversion/worker-client";
-import { MemoryStick, Database, ShieldCheck, Verified } from "lucide-react";
+import { Cpu, Database, ShieldCheck, Zap, Infinity as InfinityIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BentoGrid() {
@@ -24,53 +24,59 @@ export function BentoGrid() {
   const bars = Array.from({ length: slots }, (_, i) => i < pool.active);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2" aria-label="Runtime diagnostics">
-      {/* Worker pool */}
-      <div className="bg-surface border border-border p-5 rounded-xl flex flex-col gap-3 shadow-sm">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2" aria-label="Why RELAY is different">
+      {/* Parallel power */}
+      <div className="bg-surface border border-border p-5 rounded-xl flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-[11px] text-muted-foreground uppercase font-semibold">Web Worker Thread Allocation</span>
-          <MemoryStick className="w-4 h-4 text-primary" aria-hidden />
+          <span className="text-sm font-semibold">Blazing fast, even for big files</span>
+          <div className="w-8 h-8 rounded-lg bg-accent-light/50 dark:bg-accent-light/20 border border-primary/20 flex items-center justify-center">
+            <Zap className="w-4 h-4 text-primary" aria-hidden />
+          </div>
         </div>
         <div className="text-3xl font-bold tracking-tight">
-          {pool.active} / {slots}
+          {pool.active} <span className="text-muted-foreground">/</span> {slots} <span className="text-sm font-medium text-muted-foreground">working in parallel</span>
         </div>
         <div className="grid gap-1.5 py-1" style={{ gridTemplateColumns: `repeat(${slots}, minmax(0, 1fr))` }}>
           {bars.map((active, i) => (
-            <div key={i} className={cn("h-2 rounded bg-surface-highest", active && "bg-primary")} />
+            <div key={i} className={cn("h-2 rounded bg-surface-highest transition-colors", active && "bg-primary")} />
           ))}
         </div>
-        <span className="font-mono text-[11px] text-muted-foreground">Conversion engines run in isolated Web Workers — the UI never blocks, even on big archives.</span>
+        <span className="text-xs text-muted-foreground leading-relaxed">Conversions run in the background so the app stays smooth — no waiting on one file to finish the next.</span>
       </div>
 
       {/* Memory */}
-      <div className="bg-surface border border-border p-5 rounded-xl flex flex-col gap-3 shadow-sm">
+      <div className="bg-surface border border-border p-5 rounded-xl flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-[11px] text-muted-foreground uppercase font-semibold">Local Heap &amp; Buffer</span>
-          <Database className="w-4 h-4 text-primary" aria-hidden />
+          <span className="text-sm font-semibold">Memory used right now</span>
+          <div className="w-8 h-8 rounded-lg bg-accent-light/50 dark:bg-accent-light/20 border border-primary/20 flex items-center justify-center">
+            <Database className="w-4 h-4 text-primary" aria-hidden />
+          </div>
         </div>
         <div className="text-3xl font-bold tracking-tight">
-          {formatBytes(buffered)} <span className="text-sm font-mono text-muted-foreground">buffered</span>
+          {formatBytes(buffered)} <span className="text-sm font-medium text-muted-foreground">held in memory</span>
         </div>
         <div className="w-full bg-surface-highest h-2 rounded overflow-hidden">
           <div className="bg-primary h-full transition-all" style={{ width: `${Math.min(100, Math.max(4, heapPct))}%` }} />
         </div>
-        <span className="font-mono text-[11px] text-muted-foreground">Blobs are revoked automatically after download or removal. Clear completed to reclaim memory instantly.</span>
+        <span className="text-xs text-muted-foreground leading-relaxed">Memory is freed automatically as you download or remove files. Nothing is stored after you leave.</span>
       </div>
 
-      {/* Privacy ledger */}
-      <div className="bg-surface border border-border p-5 rounded-xl flex flex-col gap-3 shadow-sm">
+      {/* Privacy */}
+      <div className="bg-surface border border-border p-5 rounded-xl flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-[11px] text-muted-foreground uppercase font-semibold">Network Exfiltration Audit</span>
-          <Verified className="w-4 h-4 text-primary" aria-hidden />
+          <span className="text-sm font-semibold">Uploaded to a server</span>
+          <div className="w-8 h-8 rounded-lg bg-accent-light/50 dark:bg-accent-light/20 border border-primary/20 flex items-center justify-center">
+            <ShieldCheck className="w-4 h-4 text-primary" aria-hidden />
+          </div>
         </div>
         <div className="text-3xl font-bold tracking-tight text-primary">
-          0 <span className="text-sm font-mono text-muted-foreground">Bytes Out</span>
+          0 <span className="text-sm font-medium text-muted-foreground">bytes — ever</span>
         </div>
-        <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
-          <ShieldCheck className="w-3.5 h-3.5 text-primary" aria-hidden />
-          <span>Conversion engines never issue network requests</span>
+        <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
+          <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden />
+          <span>Your files physically cannot reach us</span>
         </div>
-        <span className="font-mono text-[11px] text-muted-foreground">Open DevTools → Network and watch: no file bytes are ever transmitted. Verify us, don&apos;t trust us.</span>
+        <span className="text-xs text-muted-foreground leading-relaxed">Don&apos;t take our word for it: open your browser&apos;s network monitor while converting — no file data is sent anywhere.</span>
       </div>
     </div>
   );
@@ -79,26 +85,27 @@ export function BentoGrid() {
 export function Hero() {
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-      <div className="flex flex-col gap-2 max-w-3xl">
-        <div className="inline-flex items-center gap-1.5 text-primary font-mono text-[11px] tracking-wider uppercase font-semibold">
-          <ShieldCheck className="w-4 h-4" aria-hidden />
-          <span>Zero-Latency Local Computation</span>
+      <div className="flex flex-col gap-3 max-w-3xl">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-primary bg-accent-light/50 dark:bg-accent-light/20 border border-primary/25 rounded-full px-3 py-1 text-xs font-semibold">
+            <ShieldCheck className="w-3.5 h-3.5" aria-hidden />
+            100% Private
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-primary bg-accent-light/50 dark:bg-accent-light/20 border border-primary/25 rounded-full px-3 py-1 text-xs font-semibold">
+            <InfinityIcon className="w-3.5 h-3.5" aria-hidden />
+            Free Forever
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-primary bg-accent-light/50 dark:bg-accent-light/20 border border-primary/25 rounded-full px-3 py-1 text-xs font-semibold">
+            <Cpu className="w-3.5 h-3.5" aria-hidden />
+            No Sign-up Needed
+          </span>
         </div>
-        <h1 className="text-[34px] md:text-[46px] leading-[1.1] font-bold tracking-tight">
-          Convert Files. Privately. <span className="text-primary">Right in Your Browser.</span>
+        <h1 className="text-[32px] md:text-[44px] leading-[1.1] font-bold tracking-tight">
+          Convert any file. <span className="text-primary">Instantly, privately,</span> right in your browser.
         </h1>
-        <p className="text-base text-muted-foreground max-w-2xl mt-1">
-          Client-side WebAssembly, isolated Web Workers, and native streaming APIs. Your sensitive documents, keys, archives, and media never touch a remote server.
+        <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+          Drop your files, pick a format, done. Everything happens on your own device — your documents, photos, and videos are never uploaded anywhere.
         </p>
-      </div>
-      <div className="flex flex-row md:flex-col items-start md:items-end gap-2 shrink-0">
-        <div className="bg-surface border border-border px-4 py-2 rounded-lg shadow-sm flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-primary" aria-hidden />
-          <div className="flex flex-col">
-            <span className="font-mono text-[11px] font-bold">AIR-GAPPED COMPATIBLE</span>
-            <span className="text-xs text-muted-foreground">PWA cache installed · works offline</span>
-          </div>
-        </div>
       </div>
     </div>
   );

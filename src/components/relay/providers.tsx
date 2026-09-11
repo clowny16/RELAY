@@ -4,16 +4,10 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect } from "react";
 import { setPoolStatsSink } from "@/lib/conversion/worker-client";
-import { useAuthStore } from "@/lib/store/auth-store";
 import { useQueueStore } from "@/lib/store/queue-store";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const load = useAuthStore((s) => s.load);
   const toggleFavorite = useQueueStore((s) => s.toggleFavorite);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   useEffect(() => {
     // hydrate favorites from localStorage

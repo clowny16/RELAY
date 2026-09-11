@@ -22,9 +22,9 @@ export function Dropzone() {
       if (files.length === 0) return;
       setView("convert");
       const { added, rejected } = await addFiles(files);
-      if (added > 0) toast.success(`${added} file${added > 1 ? "s" : ""} queued — processing locally`, { description: "Your files never left this device." });
-      rejected.slice(0, 3).forEach((r) => toast.error(`Rejected: ${r.name}`, { description: r.reason }));
-      if (rejected.length > 3) toast.warning(`${rejected.length - 3} more files rejected`);
+      if (added > 0) toast.success(`${added} file${added > 1 ? "s" : ""} added`, { description: "Converting on your device — nothing is uploaded." });
+      rejected.slice(0, 3).forEach((r) => toast.error(`Skipped: ${r.name}`, { description: r.reason }));
+      if (rejected.length > 3) toast.warning(`${rejected.length - 3} more files skipped`);
     },
     [addFiles, setView]
   );
@@ -77,53 +77,33 @@ export function Dropzone() {
   return (
     <div
       className={cn(
-        "relative group bg-surface hover:bg-surface-low transition-all duration-300 rounded-xl border-2 border-dashed p-6 md:p-10 flex flex-col items-center justify-center text-center shadow-sm",
-        dragging ? "bg-accent-light/20 dark:bg-accent-light/10 border-primary ring-2 ring-primary/40" : "border-border"
+        "relative group bg-surface hover:bg-surface-low transition-all duration-300 rounded-2xl border-2 border-dashed p-8 md:p-12 flex flex-col items-center justify-center text-center shadow-sm",
+        dragging ? "bg-accent-light/20 dark:bg-accent-light/10 border-primary ring-4 ring-primary/20 scale-[1.01]" : "border-border"
       )}
       data-testid="dropzone"
     >
-      {/* Crosshair corner decor */}
-      <div className="absolute top-3 left-3 font-mono text-[10px] text-muted-foreground opacity-60 select-none" aria-hidden>
-        +0.0
-      </div>
-      <div className="absolute top-3 right-3 font-mono text-[10px] text-muted-foreground opacity-60 select-none" aria-hidden>
-        +1.0
-      </div>
-      <div className="absolute bottom-3 left-3 font-mono text-[10px] text-muted-foreground opacity-60 select-none" aria-hidden>
-        -0.0
-      </div>
-      <div className="absolute bottom-3 right-3 font-mono text-[10px] text-muted-foreground opacity-60 select-none" aria-hidden>
-        -1.0
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center gap-4 max-w-2xl py-2">
-        <div className="flex items-center gap-1.5 bg-surface-high border border-border px-3 py-1 rounded-full shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" aria-hidden />
-          <span className="font-mono text-[11px] font-semibold text-primary">CLIENT-SIDE SANDBOX: VERIFIED ZERO NETWORK TRANSMISSION</span>
-        </div>
-
+      <div className="relative z-10 flex flex-col items-center gap-5 max-w-2xl">
         <div
           className={cn(
-            "w-16 h-16 rounded-xl bg-accent-light/50 dark:bg-accent-light/20 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm",
+            "w-20 h-20 rounded-2xl bg-accent-light/50 dark:bg-accent-light/20 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm",
             dragging && "scale-110 bg-primary text-primary-foreground"
           )}
         >
-          <FileUp className="w-8 h-8" aria-hidden />
+          <FileUp className="w-10 h-10" aria-hidden />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="text-lg font-bold tracking-tight">{dragging ? "Drop your files to start converting" : "Drop files or folders here to transform"}</div>
+        <div className="flex flex-col gap-1.5">
+          <div className="text-xl md:text-2xl font-bold tracking-tight">{dragging ? "Drop to start converting" : "Drop files here to convert"}</div>
           <div className="text-sm text-muted-foreground flex items-center justify-center gap-1.5 flex-wrap">
-            <span>Direct stream memory intake</span>
-            <span className="text-border" aria-hidden>•</span>
-            <kbd className="font-mono text-[11px] text-foreground font-semibold px-1.5 py-0.5 rounded bg-surface-high border border-border">Cmd+V</kbd>
-            <span>from clipboard</span>
+            <span>or paste with</span>
+            <kbd className="font-mono text-xs text-foreground font-semibold px-1.5 py-0.5 rounded-md bg-surface-high border border-border">Ctrl+V</kbd>
+            <span>— files never leave your device</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
+        <div className="flex flex-wrap items-center justify-center gap-2.5">
           <label
-            className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors text-sm font-semibold px-5 py-2.5 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm min-h-[44px]"
+            className="bg-primary hover:bg-primary/90 active:scale-[0.98] text-primary-foreground transition-all text-sm font-semibold px-6 py-3 rounded-xl flex items-center gap-2 cursor-pointer shadow-md min-h-[44px]"
             tabIndex={0}
             onKeyDown={(e) => e.key === "Enter" && fileInput.current?.click()}
           >
@@ -142,7 +122,7 @@ export function Dropzone() {
             />
           </label>
           <label
-            className="bg-surface hover:bg-surface-high text-foreground border border-border transition-colors text-sm font-medium px-4 py-2.5 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm min-h-[44px]"
+            className="bg-surface hover:bg-surface-high active:scale-[0.98] text-foreground border border-border transition-all text-sm font-medium px-5 py-3 rounded-xl flex items-center gap-2 cursor-pointer shadow-sm min-h-[44px]"
             tabIndex={0}
             onKeyDown={(e) => e.key === "Enter" && folderInput.current?.click()}
           >
@@ -166,18 +146,17 @@ export function Dropzone() {
         </div>
 
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <ShieldCheck className="w-3.5 h-3.5 text-primary" aria-hidden />
-          <span>Your files never leave your device</span>
+          <ShieldCheck className="w-4 h-4 text-primary" aria-hidden />
+          <span>100% private · Free · No sign-up · Works offline</span>
         </div>
 
-        <div className="pt-2 flex flex-wrap items-center justify-center gap-1.5">
-          <span className="font-mono text-[11px] text-muted-foreground font-semibold mr-1">SUPPORTED PIPELINES:</span>
-          {["Documents (.PDF, .DOCX, .TXT, .MD, .EPUB)", "Images (.HEIC, .AVIF, .WEBP, .TIFF, .PNG)", "Archives (.TAR, .ZIP, .GZ, .BZ2)", "Media (.MP4, .WEBM, .WAV, .FLAC)"].map((pill) => (
-            <span key={pill} className="font-mono text-[11px] px-2 py-0.5 rounded bg-surface border border-border text-foreground">
+        <div className="pt-1 flex flex-wrap items-center justify-center gap-1.5">
+          {["PDF", "Word", "Images", "Audio", "Video → GIF", "Archives", "Data", "eBooks", "Fonts"].map((pill) => (
+            <span key={pill} className="text-xs px-2.5 py-1 rounded-full bg-surface-high border border-border text-foreground">
               {pill}
             </span>
           ))}
-          <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-accent-light/50 dark:bg-accent-light/20 border border-primary/30 text-primary font-bold">+60 MORE</span>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-accent-light/50 dark:bg-accent-light/20 border border-primary/30 text-primary font-semibold">+60 more</span>
         </div>
       </div>
     </div>
