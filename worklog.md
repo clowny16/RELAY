@@ -44,3 +44,19 @@ Work Log:
 Stage Summary:
 - RELAY is now a no-account, no-pricing, 100% free client-side converter
 - Agent Browser E2E verified: CSV→JSON conversion (correct typed output in preview), job card states, filters, dark mode, mobile 390px layout, sticky footer, zero console errors
+
+---
+Task ID: 3
+Agent: Z.ai Code (main)
+Task: Show what the app is doing; detect-then-choose-format flow (no silent auto-convert)
+
+Work Log:
+- queue-store addFiles: removed auto startAll() — files now land in "waiting/Ready" state so the user picks the output first; pendingPair from Format Matrix is now actually applied as preselected target when a matching file is dropped (banner clears after apply)
+- JobCard: new waiting-state section = "Detected: <type> — <category>" banner + mini step indicator (Detected ✓ > Pick format > Convert) + output format chips (tap to choose, selected chip highlighted) + big "Convert to <FMT>" button; small dropdown now only for non-waiting states; advanced-settings trigger integrated into picker row (optionsGrid extracted to shared const)
+- Dropzone: added "How it works" 3-step strip (Drop files / We detect the type — you pick the output / Convert & download); toast copy now guides: "type detected — pick an output format, then hit Convert"
+- app-shell: pendingPair banner copy updated to "preselected — you can still change it"
+- lint + tsc clean
+
+Stage Summary:
+- New UX flow verified E2E in browser: drop CSV → Detected: CSV Data + chips (JSON/JSONL/XLSX/TSV) → picked XLSX → button label updated → converted → Save XLSX; batch: 3 files waiting → Convert All → all Done
+- Mobile 390px: steps stack, cards wrap, no page errors

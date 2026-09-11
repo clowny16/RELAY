@@ -6,6 +6,7 @@ import type { Detection, OptionField, ProgressInfo, Stage } from "@/lib/conversi
 import { detectFormat } from "@/lib/conversion/detection";
 import { getAvailableRoutes, defaultOptions, defaultTargetFor, getRoute } from "@/lib/conversion/registry";
 import { runConversion, type RunHandle } from "@/lib/conversion/runner";
+import { useUiStore } from "./ui-store";
 
 export type JobStatus = "waiting" | "preparing" | "converting" | "finalizing" | "complete" | "failed" | "cancelled" | "paused";
 
@@ -135,6 +136,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
     if (overflow > 0) rejected.push({ name: `${overflow} file(s)`, reason: `Batch limit reached (${limits.maxBatch} files at once — clear finished files to add more).` });
 
     const newJobs: ConversionJob[] = [];
+    const pendingPair = useUiStore.getState().pendingPair;
     for (const file of accepted) {
       const detection = await detectFormat(file);
       if (!detection.formatId) {
@@ -146,7 +148,13 @@ export const useQueueStore = create<QueueState>((set, get) => ({
         rejected.push({ name: file.name, reason: `No in-browser conversion available for ${detection.label ?? detection.formatId.toUpperCase()} yet.` });
         continue;
       }
-      const target = defaultTargetFor(detection.formatId)!;
+      // If the user locked a target from the Format Matrix and it matches this
+      // file's detected type, preselect it. Otherwise use the smart default.
+      const presetTarget =
+        pendingPair && pendingPair.input === detection.formatId && routes.some((r) => r.output === pendingPair.output)
+          ? pendingPair.output
+          : null;
+      const target = presetTarget ?? defaultTargetFor(detection.formatId)!;
       const route = getRoute(detection.formatId, target)!;
       newJobs.push({
         id: `j${++jobCounter}-${Date.now()}`,
@@ -162,7 +170,9 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       });
     }
     set({ jobs: [...get().jobs, ...newJobs], maxConcurrent: limits.maxConcurrent });
-    if (newJobs.length) get().startAll();
+    if (newJobs.length && pendingPair) useUiStore.getState().setPendingPair(null);
+    // Files wait in "Ready" state — the user picks the output format on each
+    // card, then hits Convert (or Convert All). No surprise auto-conversions.
     return { added: newJobs.length, rejected };
   },
 

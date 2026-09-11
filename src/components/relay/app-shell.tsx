@@ -31,8 +31,8 @@ function PendingPairBanner() {
   const { pendingPair, setPendingPair } = useUiStore();
   useEffect(() => {
     if (pendingPair) {
-      toast(`Output set to ${formatLabel(pendingPair.output).toUpperCase()}`, {
-        description: `Drop your ${formatLabel(pendingPair.input).toUpperCase()} files below and they'll be converted automatically.`,
+      toast(`Output preset to ${formatLabel(pendingPair.output).toUpperCase()}`, {
+        description: `Drop your ${formatLabel(pendingPair.input).toUpperCase()} files and this format will be preselected — you can still change it.`,
         duration: 5000,
       });
     }

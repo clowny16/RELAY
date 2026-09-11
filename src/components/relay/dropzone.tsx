@@ -22,7 +22,7 @@ export function Dropzone() {
       if (files.length === 0) return;
       setView("convert");
       const { added, rejected } = await addFiles(files);
-      if (added > 0) toast.success(`${added} file${added > 1 ? "s" : ""} added`, { description: "Converting on your device — nothing is uploaded." });
+      if (added > 0) toast.success(`${added} file${added > 1 ? "s" : ""} added — type detected`, { description: "Pick an output format on each card, then hit Convert." });
       rejected.slice(0, 3).forEach((r) => toast.error(`Skipped: ${r.name}`, { description: r.reason }));
       if (rejected.length > 3) toast.warning(`${rejected.length - 3} more files skipped`);
     },
@@ -157,6 +157,25 @@ export function Dropzone() {
             </span>
           ))}
           <span className="text-xs px-2.5 py-1 rounded-full bg-accent-light/50 dark:bg-accent-light/20 border border-primary/30 text-primary font-semibold">+60 more</span>
+        </div>
+
+        {/* how it works */}
+        <div className="mt-4 pt-6 border-t border-border/60 w-full grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+          {[
+            { n: "1", title: "Drop your files", desc: "Drag & drop, browse, or paste" },
+            { n: "2", title: "We detect the type", desc: "You pick the output format you want" },
+            { n: "3", title: "Convert & download", desc: "Processed on your device, instantly" },
+          ].map((s) => (
+            <div key={s.n} className="flex items-start gap-3">
+              <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center shrink-0" aria-hidden>
+                {s.n}
+              </span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-semibold">{s.title}</span>
+                <span className="text-xs text-muted-foreground">{s.desc}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

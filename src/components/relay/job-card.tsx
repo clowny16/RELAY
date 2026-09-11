@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQueueStore, type ConversionJob, formatBytes, outputName } from "@/lib/store/queue-store";
 import { getAvailableRoutes, getRoute } from "@/lib/conversion/registry";
-import { getFormat } from "@/lib/conversion/formats";
+import { CATEGORIES, getFormat } from "@/lib/conversion/formats";
 import { jobOptionsSchema } from "@/lib/store/queue-store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,8 @@ import {
   SlidersHorizontal,
   TrendingDown,
   Loader2,
+  ScanSearch,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -142,6 +144,68 @@ export function JobCard({ job }: { job: ConversionJob }) {
     toast.info("Pick a different output format from the selector.");
   };
 
+  const optionsGrid = schema.length > 0 ? (
+    <div className="bg-surface-low border border-border p-3 rounded-lg grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 font-mono text-[11px] mt-2">
+      {schema.map((field) => (
+        <div key={field.key} className="flex flex-col gap-1">
+          <label className="text-muted-foreground font-semibold" htmlFor={`opt-${job.id}-${field.key}`}>
+            {field.label.toUpperCase()}
+          </label>
+          {field.type === "select" ? (
+            <Select value={String(job.options[field.key] ?? field.default)} onValueChange={(v) => setOption(job.id, field.key, v)}>
+              <SelectTrigger id={`opt-${job.id}-${field.key}`} className="h-8 text-xs font-mono bg-surface">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(field.options ?? []).map((o) => (
+                  <SelectItem key={o.value} value={o.value} className="text-xs font-mono">
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : field.type === "boolean" ? (
+            <label className="flex items-center gap-2 mt-1 cursor-pointer text-foreground">
+              <input
+                id={`opt-${job.id}-${field.key}`}
+                type="checkbox"
+                className="accent-[var(--primary)] w-4 h-4 cursor-pointer"
+                checked={Boolean(job.options[field.key] ?? field.default)}
+                onChange={(e) => setOption(job.id, field.key, e.target.checked)}
+              />
+              <span>{field.hint ?? "Enabled"}</span>
+            </label>
+          ) : field.type === "range" ? (
+            <div className="flex items-center gap-2">
+              <input
+                id={`opt-${job.id}-${field.key}`}
+                type="range"
+                className="flex-1 accent-[var(--primary)]"
+                min={field.min}
+                max={field.max}
+                step={field.step}
+                value={Number(job.options[field.key] ?? field.default)}
+                onChange={(e) => setOption(job.id, field.key, Number(e.target.value))}
+                aria-label={field.label}
+              />
+              <span className="text-foreground font-semibold w-10 text-right">{String(job.options[field.key] ?? field.default)}</span>
+            </div>
+          ) : (
+            <input
+              id={`opt-${job.id}-${field.key}`}
+              type={field.type === "number" ? "number" : "text"}
+              className="bg-surface border border-border px-2 py-1 rounded text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              value={String(job.options[field.key] ?? field.default)}
+              onChange={(e) => setOption(job.id, field.key, field.type === "number" ? Number(e.target.value) : e.target.value)}
+              placeholder={field.hint}
+            />
+          )}
+          {field.type !== "boolean" && field.hint && <span className="text-muted-foreground text-[10px]">{field.hint}</span>}
+        </div>
+      ))}
+    </div>
+  ) : null;
+
   return (
     <div className="bg-surface border border-border rounded-xl p-4 md:p-5 flex flex-col gap-3 shadow-sm" data-testid="job-card">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -209,26 +273,30 @@ export function JobCard({ job }: { job: ConversionJob }) {
           </div>
         </div>
 
-        {/* center: output selector + savings */}
+        {/* center: output selector + savings (hidden while waiting — the picker below takes over) */}
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <span className="text-xs text-muted-foreground font-medium hidden md:inline">{job.status === "complete" ? "Saved as:" : "Convert to:"}</span>
-          <Select
-            value={job.target}
-            onValueChange={(v) => setTarget(job.id, v)}
-            disabled={active}
-          >
-            <SelectTrigger className="w-[150px] h-8 font-mono text-xs" aria-label={`Output format for ${job.fileName}`}>
-              <SelectValue placeholder="Output" />
-            </SelectTrigger>
-            <SelectContent>
-              {routes.map((r) => (
-                <SelectItem key={r.output} value={r.output} className="font-mono text-xs">
-                  {r.output.toUpperCase()}
-                  {r.output === "jpg" ? " (quality)" : r.output === "png" ? " (lossless)" : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {job.status !== "waiting" && (
+            <>
+              <span className="text-xs text-muted-foreground font-medium hidden md:inline">{job.status === "complete" ? "Saved as:" : "Convert to:"}</span>
+              <Select
+                value={job.target}
+                onValueChange={(v) => setTarget(job.id, v)}
+                disabled={active}
+              >
+                <SelectTrigger className="w-[150px] h-8 font-mono text-xs" aria-label={`Output format for ${job.fileName}`}>
+                  <SelectValue placeholder="Output" />
+                </SelectTrigger>
+                <SelectContent>
+                  {routes.map((r) => (
+                    <SelectItem key={r.output} value={r.output} className="font-mono text-xs">
+                      {r.output.toUpperCase()}
+                      {r.output === "jpg" ? " (quality)" : r.output === "png" ? " (lossless)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
 
           {job.status === "complete" && outBytes > 0 && (
             <div className="bg-accent-light/50 dark:bg-accent-light/20 border border-primary/30 text-primary text-xs px-2 py-1.5 rounded-lg flex items-center gap-1 font-semibold">
@@ -254,13 +322,8 @@ export function JobCard({ job }: { job: ConversionJob }) {
             </>
           )}
           {active && (
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1 hover:text-destructive hover:border-destructive/40" onClick={() => cancelJob(job.id)}>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 hover:text-destructive hover:border-destructive/40" onClick={() => cancelJob(job.id)}>
               <Square className="w-3.5 h-3.5" aria-hidden /> Cancel
-            </Button>
-          )}
-          {(job.status === "waiting" || job.status === "paused") && (
-            <Button size="sm" className="h-8 text-xs font-bold gap-1.5" onClick={convert}>
-              <Play className="w-3.5 h-3.5" aria-hidden /> Convert
             </Button>
           )}
           {(job.status === "failed" || job.status === "cancelled") && (
@@ -281,6 +344,72 @@ export function JobCard({ job }: { job: ConversionJob }) {
         </div>
       </div>
 
+      {/* waiting: detected type + format picker + convert — the main flow */}
+      {job.status === "waiting" && (
+        <div className="flex flex-col gap-3 border-t border-border pt-3" data-testid="format-picker">
+          {/* what we detected */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="inline-flex items-center gap-1.5 text-primary font-semibold text-sm">
+              <ScanSearch className="w-4 h-4" aria-hidden />
+              Detected: {fmt?.name ?? job.detection.label ?? job.detection.formatId?.toUpperCase()}
+            </span>
+            {fmt?.category && CATEGORIES[fmt.category] && (
+              <span className="text-xs text-muted-foreground">— {CATEGORIES[fmt.category].label}</span>
+            )}
+            {/* mini step indicator */}
+            <span className="ml-auto hidden md:flex items-center gap-1 text-xs text-muted-foreground" aria-hidden>
+              <span className="inline-flex items-center gap-1 text-primary font-semibold"><CheckCircle2 className="w-3.5 h-3.5" /> Detected</span>
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-primary font-semibold">Pick format</span>
+              <ChevronRight className="w-3 h-3" />
+              <span>Convert</span>
+            </span>
+          </div>
+
+          {/* pick the output format */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-foreground w-full sm:w-auto">Convert to:</span>
+            {routes.map((r) => {
+              const selected = job.target === r.output;
+              return (
+                <button
+                  key={r.output}
+                  onClick={() => setTarget(job.id, r.output)}
+                  aria-pressed={selected}
+                  title={r.note ?? undefined}
+                  className={cn(
+                    "px-3.5 py-2 rounded-lg border font-mono text-sm font-semibold transition-all min-h-[40px]",
+                    selected
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-surface border-border hover:border-primary/50 hover:text-primary"
+                  )}
+                >
+                  {r.output.toUpperCase()}
+                  {r.output === "jpg" ? " (smaller)" : r.output === "png" ? " (lossless)" : ""}
+                </button>
+              );
+            })}
+            {route?.browserDependent && (
+              <span className="text-xs text-muted-foreground" title="Depends on codecs available in your browser">· depends on your browser</span>
+            )}
+          </div>
+
+          {/* convert */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <Collapsible open={advanced} onOpenChange={setAdvanced}>
+              <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden />
+                Advanced settings
+              </CollapsibleTrigger>
+            </Collapsible>
+            <Button size="lg" className="min-h-[44px] px-6 text-sm font-bold gap-2 shadow-md" onClick={convert} data-testid="convert-button">
+              <Play className="w-4 h-4" aria-hidden />
+              Convert to {job.target.toUpperCase()}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* error row */}
       {job.status === "failed" && job.error && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2">
@@ -296,8 +425,8 @@ export function JobCard({ job }: { job: ConversionJob }) {
         </div>
       )}
 
-      {/* advanced settings */}
-      {schema.length > 0 && (
+      {/* advanced settings — while waiting the trigger lives in the format-picker row */}
+      {schema.length > 0 && job.status !== "waiting" && (
         <Collapsible open={advanced} onOpenChange={setAdvanced}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
@@ -305,69 +434,10 @@ export function JobCard({ job }: { job: ConversionJob }) {
               Advanced Settings
             </CollapsibleTrigger>
           </div>
-          <CollapsibleContent>
-            <div className="bg-surface-low border border-border p-3 rounded-lg grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 font-mono text-[11px] mt-2">
-              {schema.map((field) => (
-                <div key={field.key} className="flex flex-col gap-1">
-                  <label className="text-muted-foreground font-semibold" htmlFor={`opt-${job.id}-${field.key}`}>
-                    {field.label.toUpperCase()}
-                  </label>
-                  {field.type === "select" ? (
-                    <Select value={String(job.options[field.key] ?? field.default)} onValueChange={(v) => setOption(job.id, field.key, v)}>
-                      <SelectTrigger id={`opt-${job.id}-${field.key}`} className="h-8 text-xs font-mono bg-surface">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(field.options ?? []).map((o) => (
-                          <SelectItem key={o.value} value={o.value} className="text-xs font-mono">
-                            {o.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : field.type === "boolean" ? (
-                    <label className="flex items-center gap-2 mt-1 cursor-pointer text-foreground">
-                      <input
-                        id={`opt-${job.id}-${field.key}`}
-                        type="checkbox"
-                        className="accent-[var(--primary)] w-4 h-4 cursor-pointer"
-                        checked={Boolean(job.options[field.key] ?? field.default)}
-                        onChange={(e) => setOption(job.id, field.key, e.target.checked)}
-                      />
-                      <span>{field.hint ?? "Enabled"}</span>
-                    </label>
-                  ) : field.type === "range" ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        id={`opt-${job.id}-${field.key}`}
-                        type="range"
-                        className="flex-1 accent-[var(--primary)]"
-                        min={field.min}
-                        max={field.max}
-                        step={field.step}
-                        value={Number(job.options[field.key] ?? field.default)}
-                        onChange={(e) => setOption(job.id, field.key, Number(e.target.value))}
-                        aria-label={field.label}
-                      />
-                      <span className="text-foreground font-semibold w-10 text-right">{String(job.options[field.key] ?? field.default)}</span>
-                    </div>
-                  ) : (
-                    <input
-                      id={`opt-${job.id}-${field.key}`}
-                      type={field.type === "number" ? "number" : "text"}
-                      className="bg-surface border border-border px-2 py-1 rounded text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                      value={String(job.options[field.key] ?? field.default)}
-                      onChange={(e) => setOption(job.id, field.key, field.type === "number" ? Number(e.target.value) : e.target.value)}
-                      placeholder={field.hint}
-                    />
-                  )}
-                  {field.type !== "boolean" && field.hint && <span className="text-muted-foreground text-[10px]">{field.hint}</span>}
-                </div>
-              ))}
-            </div>
-          </CollapsibleContent>
+          <CollapsibleContent>{optionsGrid}</CollapsibleContent>
         </Collapsible>
       )}
+      {schema.length > 0 && job.status === "waiting" && advanced && optionsGrid}
 
       {/* progress ribbon */}
       {(showProgress || job.status === "failed") && (
@@ -395,15 +465,6 @@ export function JobCard({ job }: { job: ConversionJob }) {
         </div>
       )}
 
-      {job.status === "waiting" && (
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border/60">
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" aria-hidden />
-            Ready to convert
-          </span>
-          <span className="hidden md:inline">{route?.note ? route.note.slice(0, 64) : "waiting in queue"}</span>
-        </div>
-      )}
     </div>
   );
 }
