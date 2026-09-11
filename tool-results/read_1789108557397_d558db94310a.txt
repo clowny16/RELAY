@@ -1,0 +1,2002 @@
+     1→     1→Build a Production-Ready Browser-Only File Conversion SaaS
+     2→     2→Build a modern SaaS web application for client-side file conversion. The core product is a privacy-first “Convert Anything” file conversion platform where files are processed entirely inside the user's browser whenever technically possible.
+     3→     3→
+     4→     4→The application must NOT upload user files to our servers for conversion.
+     5→     5→
+     6→     6→The product should feel polished, fast, trustworthy, modern, and production-ready — not like a basic file-upload utility.
+     7→     7→
+     8→     8→
+     9→     9→1. Core Product Concept
+    10→    10→Create a SaaS platform where a user can:
+    11→    11→
+    12→    12→Select or drag-and-drop one or multiple files.
+    13→    13→Automatically detect each file's format.
+    14→    14→Select a compatible output format.
+    15→    15→Convert the file directly inside the browser.
+    16→    16→See real-time conversion progress.
+    17→    17→Preview the result when possible.
+    18→    18→Download the converted file.
+    19→    19→Download multiple converted files as a ZIP.
+    20→    20→Convert multiple files in batch.
+    21→    21→Perform archive operations such as ZIP/TAR/7Z conversions and extraction.
+    22→    22→Never send the user's actual file contents to a conversion backend.
+    23→    23→The main selling point is:
+    24→    24→
+    25→    25→Your files stay on your device.
+    26→    26→Use privacy as a major part of the product experience.
+    27→    27→
+    28→    28→
+    29→    29→2. Important Architecture Requirement
+    30→    30→The application must be frontend-first / browser-only for file processing.
+    31→    31→
+    32→    32→Do NOT create a backend API that receives uploaded files for conversion.
+    33→    33→
+    34→    34→All supported conversions should run locally using:
+    35→    35→
+    36→    36→JavaScript
+    37→    37→Web APIs
+    38→    38→Web Workers
+    39→    39→WebAssembly
+    40→    40→Client-side libraries
+    41→    41→Browser-native APIs where appropriate
+    42→    42→Use Web Workers for CPU-heavy operations so that the UI remains responsive.
+    43→    43→
+    44→    44→Large files must not block the main browser thread.
+    45→    45→
+    46→    46→If a conversion cannot reliably be performed locally, clearly mark it as:
+    47→    47→
+    48→    48→“Not supported in browser”
+    49→    49→rather than secretly uploading the file to a server.
+    50→    50→
+    51→    51→
+    52→    52→
+    53→    53→The architecture should separate:
+    54→    54→
+    55→    55→SaaS Account Data
+    56→    56→↓
+    57→    57→Authentication / Billing
+    58→    58→
+    59→    59→User File
+    60→    60→↓
+    61→    61→Browser
+    62→    62→↓
+    63→    63→Local Conversion Engine
+    64→    64→↓
+    65→    65→Downloaded Result
+    66→    66→
+    67→    67→Never mix the two.
+    68→    68→
+    69→    69→
+    70→    70→4. Recommended Technology Stack
+    71→    71→Use a modern production-ready stack.
+    72→    72→
+    73→    73→Preferred:
+    74→    74→
+    75→    75→Next.js
+    76→    76→React
+    77→    77→TypeScript
+    78→    78→Tailwind CSS
+    79→    79→shadcn/ui or equivalent polished component system
+    80→    80→Web Workers
+    81→    81→WebAssembly
+    82→    82→IndexedDB for optional local temporary state
+    83→    83→PWA support if practical
+    84→    84→Use modular conversion engines so additional formats can be added later.
+    85→    85→
+    86→    86→Do not hard-code conversion logic into UI components.
+    87→    87→
+    88→    88→Create a conversion registry.
+    89→    89→
+    90→    90→Example conceptual structure:
+    91→    91→
+    92→    92→ConversionRegistry
+    93→    93→├── image
+    94→    94→├── document
+    95→    95→├── audio
+    96→    96→├── video
+    97→    97→├── archive
+    98→    98→├── ebook
+    99→    99→├── data
+   100→   100→├── 3d
+   101→   101→├── font
+   102→   102→├── subtitle
+   103→   103→├── gis
+   104→   104→└── developer
+   105→   105→
+   106→   106→
+   107→   107→5. Homepage
+   108→   108→Create a premium SaaS landing page.
+   109→   109→
+   110→   110→Hero section:
+   111→   111→
+   112→   112→Headline:
+   113→   113→
+   114→   114→Convert Files. Privately. Right in Your Browser.
+   115→   115→Subheadline:
+   116→   116→
+   117→   117→Convert documents, images, audio, video, archives, eBooks, data and more without uploading your files.
+   118→   118→Primary CTA:
+   119→   119→
+   120→   120→Start Converting
+   121→   121→Secondary CTA:
+   122→   122→
+   123→   123→Explore Formats
+   124→   124→Show a large central drag-and-drop conversion area.
+   125→   125→
+   126→   126→Example:
+   127→   127→
+   128→   128→┌──────────────────────────────────────────────┐
+   129→   129→│ │
+   130→   130→│ Drop files here │
+   131→   131→│ │
+   132→   132→│ or │
+   133→   133→│ │
+   134→   134→│ [ Choose Files ] │
+   135→   135→│ │
+   136→   136→│ Your files never leave your device │
+   137→   137→│ │
+   138→   138→└──────────────────────────────────────────────┘
+   139→   139→
+   140→   140→
+   141→   141→6. Homepage Feature Sections
+   142→   142→Include:
+   143→   143→
+   144→   144→Private by Design
+   145→   145→Explain:
+   146→   146→
+   147→   147→Files are processed locally in your browser. We don't need to upload your files to convert them.
+   148→   148→Hundreds of Formats
+   149→   149→Show categories:
+   150→   150→
+   151→   151→Documents
+   152→   152→Images
+   153→   153→Audio
+   154→   154→Video
+   155→   155→Archives
+   156→   156→eBooks
+   157→   157→Data
+   158→   158→3D
+   159→   159→Fonts
+   160→   160→Developer
+   161→   161→Subtitles
+   162→   162→GIS
+   163→   163→Batch Conversion
+   164→   164→Explain that users can convert multiple files at once.
+   165→   165→
+   166→   166→No Installation
+   167→   167→Everything works directly from the browser.
+   168→   168→
+   169→   169→Fast Local Processing
+   170→   170→Use Web Workers and WASM where appropriate.
+   171→   171→
+   172→   172→
+   173→   173→7. Main Converter Interface
+   174→   174→Create /convert.
+   175→   175→
+   176→   176→Layout:
+   177→   177→
+   178→   178→Header
+   179→   179→
+   180→   180→Convert Files
+   181→   181→
+   182→   182→[ Drop files here ]
+   183→   183→
+   184→   184→or
+   185→   185→
+   186→   186→[ Choose Files ]
+   187→   187→
+   188→   188→Supported formats
+   189→   189→
+   190→   190→Recent conversions / current queue
+   191→   191→
+   192→   192→After uploading:
+   193→   193→
+   194→   194→Files
+   195→   195→────────────────────────────────────
+   196→   196→
+   197→   197→photo.heic
+   198→   198→HEIC
+   199→   199→2.4 MB
+   200→   200→
+   201→   201→Convert to:
+   202→   202→[ JPG ▼ ]
+   203→   203→
+   204→   204→[ Convert ]
+   205→   205→
+   206→   206→────────────────────────────────────
+   207→   207→
+   208→   208→document.pdf
+   209→   209→PDF
+   210→   210→8.7 MB
+   211→   211→
+   212→   212→Convert to:
+   213→   213→[ DOCX ▼ ]
+   214→   214→
+   215→   215→[ Convert ]
+   216→   216→
+   217→   217→
+   218→   218→8. Drag & Drop
+   219→   219→Support:
+   220→   220→
+   221→   221→Drag files onto page
+   222→   222→Drag multiple files
+   223→   223→Drag folders if browser supports it
+   224→   224→Click to browse
+   225→   225→Clipboard paste where technically possible
+   226→   226→Mobile file picker
+   227→   227→Show visual drag state:
+   228→   228→
+   229→   229→Drop your files to start converting
+   230→   230→
+   231→   231→Reject unsupported files with a friendly error.
+   232→   232→
+   233→   233→
+   234→   234→9. Automatic Format Detection
+   235→   235→Do not rely only on filename extensions.
+   236→   236→
+   237→   237→Use:
+   238→   238→
+   239→   239→Extension
+   240→   240→MIME type
+   241→   241→File signature / magic bytes where possible
+   242→   242→Example:
+   243→   243→
+   244→   244→photo.jpg
+   245→   245→Detected:
+   246→   246→JPEG Image
+   247→   247→
+   248→   248→If extension and actual file type disagree:
+   249→   249→
+   250→   250→We detected the file as PNG even though its filename ends in .jpg.
+   251→   251→
+   252→   252→Allow the user to continue only if safe.
+   253→   253→
+   254→   254→
+   255→   255→10. Output Format Selector
+   256→   256→The output selector should ONLY show compatible formats.
+   257→   257→
+   258→   258→Do not show every format for every input.
+   259→   259→
+   260→   260→For example:
+   261→   261→
+   262→   262→Input: JPG
+   263→   263→Show:
+   264→   264→
+   265→   265→PNG
+   266→   266→WebP
+   267→   267→AVIF
+   268→   268→TIFF
+   269→   269→BMP
+   270→   270→GIF
+   271→   271→PDF
+   272→   272→SVG where conversion makes sense
+   273→   273→Input: PDF
+   274→   274→Show:
+   275→   275→
+   276→   276→JPG
+   277→   277→PNG
+   278→   278→WebP
+   279→   279→TIFF
+   280→   280→TXT
+   281→   281→HTML
+   282→   282→SVG where supported
+   283→   283→EPUB where supported
+   284→   284→Input: TAR
+   285→   285→Show:
+   286→   286→
+   287→   287→ZIP
+   288→   288→7Z
+   289→   289→TAR.GZ
+   290→   290→TAR.BZ2
+   291→   291→TAR.XZ
+   292→   292→Input: ZIP
+   293→   293→Show:
+   294→   294→
+   295→   295→TAR
+   296→   296→TAR.GZ
+   297→   297→TAR.BZ2
+   298→   298→TAR.XZ
+   299→   299→7Z
+   300→   300→The compatibility matrix must be data-driven.
+   301→   301→
+   302→   302→
+   303→   303→11. Conversion Matrix
+   304→   304→Create a central registry such as:
+   305→   305→
+   306→   306→{
+   307→   307→input: "tar",
+   308→   308→outputs: [
+   309→   309→"zip",
+   310→   310→"7z",
+   311→   311→"tar.gz",
+   312→   312→"tar.bz2",
+   313→   313→"tar.xz"
+   314→   314→]
+   315→   315→}
+   316→   316→
+   317→   317→Every conversion engine must register:
+   318→   318→
+   319→   319→Input format
+   320→   320→Output formats
+   321→   321→MIME types
+   322→   322→File extensions
+   323→   323→Engine
+   324→   324→Whether WASM is required
+   325→   325→Maximum recommended size
+   326→   326→Whether batch processing is supported
+   327→   327→Whether preview is supported
+   328→   328→
+   329→   329→12. Supported Format Categories
+   330→   330→Implement the format registry with the following formats.
+   331→   331→
+   332→   332→Documents
+   333→   333→PDF
+   334→   334→DOC
+   335→   335→DOCX
+   336→   336→DOCM
+   337→   337→XLS
+   338→   338→XLSX
+   339→   339→XLSM
+   340→   340→PPT
+   341→   341→PPTX
+   342→   342→PPTM
+   343→   343→ODT
+   344→   344→ODS
+   345→   345→ODP
+   346→   346→RTF
+   347→   347→TXT
+   348→   348→MD
+   349→   349→Markdown
+   350→   350→CSV
+   351→   351→TSV
+   352→   352→HTML
+   353→   353→HTM
+   354→   354→XML
+   355→   355→EPUB
+   356→   356→MOBI
+   357→   357→AZW
+   358→   358→AZW3
+   359→   359→DJVU
+   360→   360→TEX
+   361→   361→JSON
+   362→   362→YAML
+   363→   363→YML
+   364→   364→TOML
+   365→   365→INI
+   366→   366→
+   367→   367→13. Image Formats
+   368→   368→Common
+   369→   369→JPG
+   370→   370→JPEG
+   371→   371→PNG
+   372→   372→GIF
+   373→   373→WebP
+   374→   374→BMP
+   375→   375→TIFF
+   376→   376→TIF
+   377→   377→SVG
+   378→   378→ICO
+   379→   379→HEIC
+   380→   380→HEIF
+   381→   381→AVIF
+   382→   382→Professional
+   383→   383→RAW
+   384→   384→PSD
+   385→   385→AI
+   386→   386→EPS
+   387→   387→TGA
+   388→   388→DDS
+   389→   389→EXR
+   390→   390→HDR
+   391→   391→JP2
+   392→   392→J2K
+   393→   393→JXL
+   394→   394→XCF
+   395→   395→Camera RAW
+   396→   396→CR2
+   397→   397→CR3
+   398→   398→NEF
+   399→   399→ARW
+   400→   400→ORF
+   401→   401→RW2
+   402→   402→RAF
+   403→   403→DNG
+   404→   404→Only expose conversions that can actually be performed reliably in-browser.
+   405→   405→
+   406→   406→
+   407→   407→14. Audio Formats
+   408→   408→Support where browser/WASM engines allow:
+   409→   409→
+   410→   410→MP3
+   411→   411→WAV
+   412→   412→AAC
+   413→   413→M4A
+   414→   414→FLAC
+   415→   415→OGG
+   416→   416→OPUS
+   417→   417→WMA
+   418→   418→AIFF
+   419→   419→AIF
+   420→   420→ALAC
+   421→   421→AMR
+   422→   422→MIDI
+   423→   423→MID
+   424→   424→AC3
+   425→   425→DTS
+   426→   426→MKA
+   427→   427→APE
+   428→   428→Provide options such as:
+   429→   429→
+   430→   430→Bitrate
+   431→   431→Sample rate
+   432→   432→Channels
+   433→   433→Quality
+   434→   434→Output filename
+   435→   435→Only show options relevant to the selected output format.
+   436→   436→
+   437→   437→
+   438→   438→15. Video Formats
+   439→   439→Support through a client-side media engine where technically feasible:
+   440→   440→
+   441→   441→MP4
+   442→   442→MKV
+   443→   443→AVI
+   444→   444→MOV
+   445→   445→WebM
+   446→   446→WMV
+   447→   447→FLV
+   448→   448→MPEG
+   449→   449→MPG
+   450→   450→M4V
+   451→   451→3GP
+   452→   452→3G2
+   453→   453→TS
+   454→   454→MTS
+   455→   455→M2TS
+   456→   456→OGV
+   457→   457→VOB
+   458→   458→MXF
+   459→   459→ASF
+   460→   460→Provide:
+   461→   461→
+   462→   462→Resolution
+   463→   463→Codec
+   464→   464→Bitrate
+   465→   465→FPS
+   466→   466→Audio codec
+   467→   467→Audio bitrate
+   468→   468→Quality
+   469→   469→Trim start/end
+   470→   470→Remove audio
+   471→   471→Extract audio
+   472→   472→Generate GIF
+   473→   473→Do not load massive conversion engines until needed.
+   474→   474→
+   475→   475→Use lazy loading.
+   476→   476→
+   477→   477→
+   478→   478→16. Archive Formats
+   479→   479→This is a major feature.
+   480→   480→
+   481→   481→Support:
+   482→   482→
+   483→   483→ZIP
+   484→   484→TAR
+   485→   485→GZ
+   486→   486→TAR.GZ
+   487→   487→TGZ
+   488→   488→BZ2
+   489→   489→TAR.BZ2
+   490→   490→TBZ2
+   491→   491→XZ
+   492→   492→TAR.XZ
+   493→   493→TXZ
+   494→   494→7Z
+   495→   495→RAR
+   496→   496→Z
+   497→   497→TAR.Z
+   498→   498→ZST
+   499→   499→BR
+   500→   500→LZ
+   501→   501→LZMA
+   502→   502→LZH
+   503→   503→CAB
+   504→   504→ARJ
+   505→   505→ACE
+   506→   506→CPIO
+   507→   507→ISO
+   508→   508→DMG
+   509→   509→WIM
+   510→   510→XAR
+   511→   511→ZPAQ
+   512→   512→
+   513→   513→17. Archive Conversion
+   514→   514→Explicitly support:
+   515→   515→
+   516→   516→TAR → ZIP
+   517→   517→ZIP → TAR
+   518→   518→
+   519→   519→TAR → 7Z
+   520→   520→7Z → TAR
+   521→   521→
+   522→   522→TAR.GZ → ZIP
+   523→   523→ZIP → TAR.GZ
+   524→   524→
+   525→   525→TAR.BZ2 → ZIP
+   526→   526→ZIP → TAR.BZ2
+   527→   527→
+   528→   528→TAR.XZ → ZIP
+   529→   529→ZIP → TAR.XZ
+   530→   530→
+   531→   531→ZIP → 7Z
+   532→   532→7Z → ZIP
+   533→   533→
+   534→   534→RAR → ZIP
+   535→   535→RAR → 7Z
+   536→   536→
+   537→   537→GZ → ZIP
+   538→   538→BZ2 → ZIP
+   539→   539→XZ → ZIP
+   540→   540→
+   541→   541→Where direct creation/extraction is technically supported.
+   542→   542→
+   543→   543→If an archive format cannot be created due to library/licensing/technical restrictions, support extraction where possible and clearly indicate the limitation.
+   544→   544→
+   545→   545→
+   546→   546→18. Archive Extraction
+   547→   547→Add a separate:
+   548→   548→
+   549→   549→Extract Archive
+   550→   550→feature.
+   551→   551→
+   552→   552→Example:
+   553→   553→
+   554→   554→Drop archive here
+   555→   555→
+   556→   556→ZIP
+   557→   557→TAR
+   558→   558→RAR
+   559→   559→7Z
+   560→   560→GZ
+   561→   561→...
+   562→   562→
+   563→   563→[ Extract ]
+   564→   564→
+   565→   565→Show contents before extraction:
+   566→   566→
+   567→   567→my-project.zip
+   568→   568→
+   569→   569→127 files
+   570→   570→18 folders
+   571→   571→42.7 MB
+   572→   572→
+   573→   573→├── src/
+   574→   574→├── public/
+   575→   575→├── package.json
+   576→   576→└── README.md
+   577→   577→
+   578→   578→[ Extract All ]
+   579→   579→
+   580→   580→Allow:
+   581→   581→
+   582→   582→Extract all
+   583→   583→Select individual files
+   584→   584→Download selected files
+   585→   585→Download extracted folder as ZIP
+   586→   586→Use safe archive extraction practices.
+   587→   587→
+   588→   588→Protect against:
+   589→   589→
+   590→   590→Zip bombs
+   591→   591→Path traversal
+   592→   592→Excessive memory use
+   593→   593→Malicious filenames
+   594→   594→Extremely nested archives
+   595→   595→
+   596→   596→19. Document Conversion
+   597→   597→Where browser-compatible libraries exist, support:
+   598→   598→
+   599→   599→DOCX → PDF
+   600→   600→PDF → images
+   601→   601→PDF → TXT
+   602→   602→PDF → HTML
+   603→   603→TXT → PDF
+   604→   604→HTML → PDF
+   605→   605→Markdown → HTML
+   606→   606→Markdown → PDF
+   607→   607→CSV → XLSX
+   608→   608→XLSX → CSV
+   609→   609→JSON → CSV
+   610→   610→CSV → JSON
+   611→   611→JSON → YAML
+   612→   612→YAML → JSON
+   613→   613→XML → JSON
+   614→   614→Do not claim pixel-perfect office conversion unless the actual engine can provide it.
+   615→   615→
+   616→   616→
+   617→   617→20. eBook Conversion
+   618→   618→Support:
+   619→   619→
+   620→   620→EPUB
+   621→   621→MOBI
+   622→   622→AZW
+   623→   623→AZW3
+   624→   624→FB2
+   625→   625→CBZ
+   626→   626→CBR
+   627→   627→Possible conversions:
+   628→   628→
+   629→   629→EPUB → PDF
+   630→   630→EPUB → TXT
+   631→   631→EPUB → HTML
+   632→   632→
+   633→   633→MOBI → EPUB
+   634→   634→MOBI → PDF
+   635→   635→
+   636→   636→AZW3 → EPUB
+   637→   637→
+   638→   638→DRM-protected files must not be processed.
+   639→   639→
+   640→   640→
+   641→   641→21. 3D Conversion
+   642→   642→Registry should include:
+   643→   643→
+   644→   644→STL
+   645→   645→OBJ
+   646→   646→FBX
+   647→   647→GLTF
+   648→   648→GLB
+   649→   649→3DS
+   650→   650→BLEND
+   651→   651→STEP
+   652→   652→STP
+   653→   653→IGES
+   654→   654→IGS
+   655→   655→DWG
+   656→   656→DXF
+   657→   657→DAE
+   658→   658→PLY
+   659→   659→OFF
+   660→   660→3MF
+   661→   661→AMF
+   662→   662→WRL
+   663→   663→X3D
+   664→   664→USD
+   665→   665→USDA
+   666→   666→USDC
+   667→   667→USDZ
+   668→   668→Show a 3D preview where possible.
+   669→   669→
+   670→   670→Support:
+   671→   671→
+   672→   672→Rotate
+   673→   673→Zoom
+   674→   674→Pan
+   675→   675→Wireframe
+   676→   676→Solid view
+   677→   677→Background color
+   678→   678→Model statistics
+   679→   679→Only expose conversions actually implemented.
+   680→   680→
+   681→   681→
+   682→   682→22. Font Conversion
+   683→   683→Include:
+   684→   684→
+   685→   685→TTF
+   686→   686→OTF
+   687→   687→WOFF
+   688→   688→WOFF2
+   689→   689→EOT
+   690→   690→TTC
+   691→   691→FON
+   692→   692→Show font metadata when possible.
+   693→   693→
+   694→   694→
+   695→   695→23. Data Conversion
+   696→   696→Support:
+   697→   697→
+   698→   698→CSV
+   699→   699→TSV
+   700→   700→JSON
+   701→   701→JSONL
+   702→   702→NDJSON
+   703→   703→XML
+   704→   704→YAML
+   705→   705→TOML
+   706→   706→SQL
+   707→   707→SQLite
+   708→   708→SQLite3
+   709→   709→DB
+   710→   710→Parquet
+   711→   711→Avro
+   712→   712→ORC
+   713→   713→Feather
+   714→   714→Provide a data preview.
+   715→   715→
+   716→   716→Example:
+   717→   717→
+   718→   718→Rows: 25,431
+   719→   719→Columns: 18
+   720→   720→
+   721→   721→┌────────┬─────────┬─────────┐
+   722→   722→│ Name │ Email │ Country │
+   723→   723→├────────┼─────────┼─────────┤
+   724→   724→│ John │ ... │ USA │
+   725→   725→└────────┴─────────┴─────────┘
+   726→   726→
+   727→   727→
+   728→   728→24. CSV Tools
+   729→   729→CSV conversion should have advanced options:
+   730→   730→
+   731→   731→Delimiter
+   732→   732→Encoding
+   733→   733→Header detection
+   734→   734→Quote character
+   735→   735→Escape character
+   736→   736→Line ending
+   737→   737→Column selection
+   738→   738→Preview
+   739→   739→JSON output structure
+   740→   740→
+   741→   741→25. PDF Tools
+   742→   742→In addition to conversion, create:
+   743→   743→
+   744→   744→PDF → JPG
+   745→   745→PDF → PNG
+   746→   746→PDF → WebP
+   747→   747→PDF → TIFF
+   748→   748→Images → PDF
+   749→   749→Merge PDFs
+   750→   750→Split PDF
+   751→   751→Extract pages
+   752→   752→Reorder pages
+   753→   753→Rotate pages
+   754→   754→Compress PDF where feasible
+   755→   755→PDF metadata viewer
+   756→   756→PDF page preview
+   757→   757→Create a dedicated PDF tools section.
+   758→   758→
+   759→   759→
+   760→   760→26. Image Tools
+   761→   761→Add:
+   762→   762→
+   763→   763→Resize
+   764→   764→Crop
+   765→   765→Rotate
+   766→   766→Flip
+   767→   767→Compress
+   768→   768→Change quality
+   769→   769→Remove metadata where possible
+   770→   770→Convert format
+   771→   771→Change dimensions
+   772→   772→Grayscale
+   773→   773→Generate favicon
+   774→   774→Image → PDF
+   775→   775→Allow users to process multiple images at once.
+   776→   776→
+   777→   777→
+   778→   778→27. Batch Conversion
+   779→   779→Allow:
+   780→   780→
+   781→   781→photo1.heic
+   782→   782→photo2.heic
+   783→   783→photo3.heic
+   784→   784→photo4.heic
+   785→   785→
+   786→   786→Choose:
+   787→   787→
+   788→   788→Convert all to:
+   789→   789→[ JPG ]
+   790→   790→
+   791→   791→Then:
+   792→   792→
+   793→   793→4 files
+   794→   794→[ Convert All ]
+   795→   795→
+   796→   796→Show individual progress:
+   797→   797→
+   798→   798→photo1.heic ██████████ 100%
+   799→   799→photo2.heic ███████░░░ 70%
+   800→   800→photo3.heic ████░░░░░░ 40%
+   801→   801→photo4.heic Waiting
+   802→   802→
+   803→   803→Allow:
+   804→   804→
+   805→   805→Pause
+   806→   806→Resume
+   807→   807→Cancel
+   808→   808→Retry failed
+   809→   809→Download individually
+   810→   810→Download all as ZIP
+   811→   811→
+   812→   812→28. Conversion Queue
+   813→   813→Create a robust queue system.
+   814→   814→
+   815→   815→Each job should have:
+   816→   816→
+   817→   817→Filename
+   818→   818→Input format
+   819→   819→Output format
+   820→   820→File size
+   821→   821→Status
+   822→   822→Progress
+   823→   823→Speed
+   824→   824→Estimated remaining time
+   825→   825→Output size
+   826→   826→Error message
+   827→   827→Statuses:
+   828→   828→
+   829→   829→Waiting
+   830→   830→Preparing
+   831→   831→Converting
+   832→   832→Finalizing
+   833→   833→Complete
+   834→   834→Failed
+   835→   835→Cancelled
+   836→   836→
+   837→   837→29. Download System
+   838→   838→For completed files:
+   839→   839→
+   840→   840→✓ conversion complete
+   841→   841→
+   842→   842→output.jpg
+   843→   843→2.1 MB
+   844→   844→
+   845→   845→[ Download ]
+   846→   846→[ Preview ]
+   847→   847→
+   848→   848→For multiple files:
+   849→   849→
+   850→   850→[ Download All ]
+   851→   851→
+   852→   852→Package them locally into a ZIP.
+   853→   853→
+   854→   854→No server-side ZIP generation.
+   855→   855→
+   856→   856→
+   857→   857→30. File Naming
+   858→   858→Automatically generate sensible filenames.
+   859→   859→
+   860→   860→Example:
+   861→   861→
+   862→   862→photo.heic
+   863→   863→→ photo.jpg
+   864→   864→
+   865→   865→document.docx
+   866→   866→→ document.pdf
+   867→   867→
+   868→   868→archive.tar
+   869→   869→→ archive.zip
+   870→   870→
+   871→   871→Allow custom naming templates:
+   872→   872→
+   873→   873→{name}.{extension}
+   874→   874→
+   875→   875→{name}-converted.{extension}
+   876→   876→
+   877→   877→{original-name}-{format}.{extension}
+   878→   878→
+   879→   879→
+   880→   880→31. Conversion Settings
+   881→   881→Create an expandable:
+   882→   882→
+   883→   883→Advanced Settings
+   884→   884→panel.
+   885→   885→
+   886→   886→Settings should be format-specific.
+   887→   887→
+   888→   888→Examples:
+   889→   889→
+   890→   890→Image
+   891→   891→Width
+   892→   892→Height
+   893→   893→Quality
+   894→   894→DPI
+   895→   895→Compression
+   896→   896→Preserve metadata
+   897→   897→Audio
+   898→   898→Bitrate
+   899→   899→Sample rate
+   900→   900→Channels
+   901→   901→Codec
+   902→   902→Video
+   903→   903→Resolution
+   904→   904→FPS
+   905→   905→Codec
+   906→   906→Bitrate
+   907→   907→Quality
+   908→   908→Audio settings
+   909→   909→PDF
+   910→   910→DPI
+   911→   911→Image quality
+   912→   912→Page range
+   913→   913→Archive
+   914→   914→Compression level
+   915→   915→Password where technically supported
+   916→   916→Preserve directory structure
+   917→   917→Never show irrelevant settings.
+   918→   918→
+   919→   919→
+   920→   920→32. Local Privacy
+   921→   921→Display a privacy indicator throughout the application:
+   922→   922→
+   923→   923→🔒 Processed locally
+   924→   924→Add a tooltip:
+   925→   925→
+   926→   926→Your file is processed on this device and isn't uploaded for conversion.
+   927→   927→Do not use analytics that accidentally capture filenames or file contents.
+   928→   928→
+   929→   929→Never send:
+   930→   930→
+   931→   931→File contents
+   932→   932→File previews
+   933→   933→File hashes unless explicitly required and disclosed
+   934→   934→Extracted text
+   935→   935→Personal document contents
+   936→   936→to analytics systems.
+   937→   937→
+   938→   938→
+   939→   939→33. Offline / PWA
+   940→   940→Make the application optionally installable as a PWA.
+   941→   941→
+   942→   942→After required assets are cached, basic conversions should work offline where possible.
+   943→   943→
+   944→   944→Display:
+   945→   945→
+   946→   946→Offline mode
+   947→   947→when disconnected.
+   948→   948→
+   949→   949→Do not pretend every conversion works offline if its engine has not been cached.
+   950→   950→
+   951→   951→
+   952→   952→34. Storage Management
+   953→   953→Do not automatically upload files.
+   954→   954→
+   955→   955→Use browser memory, streams, temporary Blob URLs, and IndexedDB only when appropriate.
+   956→   956→
+   957→   957→Add:
+   958→   958→
+   959→   959→Clear local data
+   960→   960→button.
+   961→   961→
+   962→   962→Allow the user to remove temporary conversion data.
+   963→   963→
+   964→   964→Automatically clean temporary files when appropriate.
+   965→   965→
+   966→   966→
+   967→   967→35. Large File Handling
+   968→   968→Design for large files.
+   969→   969→
+   970→   970→Use:
+   971→   971→
+   972→   972→Streaming APIs where possible
+   973→   973→ArrayBuffer carefully
+   974→   974→Blob APIs
+   975→   975→Web Workers
+   976→   976→Chunked processing
+   977→   977→Lazy loading
+   978→   978→Memory cleanup
+   979→   979→Garbage collection-friendly architecture
+   980→   980→Show a warning when a conversion may require significant RAM.
+   981→   981→
+   982→   982→Example:
+   983→   983→
+   984→   984→This 2.4 GB video may require substantial memory. Continue?
+   985→   985→
+   986→   986→36. Error Handling
+   987→   987→Errors must be human-readable.
+   988→   988→
+   989→   989→Never display:
+   990→   990→
+   991→   991→WASM_ERR_0x000293
+   992→   992→
+   993→   993→Instead:
+   994→   994→
+   995→   995→This file could not be converted. The format may be unsupported or the file may be corrupted.
+   996→   996→Provide:
+   997→   997→
+   998→   998→Retry
+   999→   999→Try another format
+  1000→  1000→Remove file
+  1001→  1001→Report issue
+  1002→  1002→Possible errors:
+  1003→  1003→
+  1004→  1004→Unsupported format
+  1005→  1005→Corrupted file
+  1006→  1006→Conversion failed
+  1007→  1007→Insufficient memory
+  1008→  1008→Browser limitation
+  1009→  1009→File too large
+  1010→  1010→Password protected
+  1011→  1011→DRM protected
+  1012→  1012→Unsupported codec
+  1013→  1013→Unsupported archive
+  1014→  1014→Conversion timed out
+  1015→  1015→
+  1016→  1016→37. Browser Compatibility
+  1017→  1017→Detect browser capabilities.
+  1018→  1018→
+  1019→  1019→Support modern:
+  1020→  1020→
+  1021→  1021→Chrome
+  1022→  1022→Edge
+  1023→  1023→Firefox
+  1024→  1024→Safari
+  1025→  1025→If a feature is unavailable:
+  1026→  1026→
+  1027→  1027→This conversion requires a browser feature that isn't available in your current browser.
+  1028→  1028→Recommend a supported browser without blocking the entire application.
+  1029→  1029→
+  1030→  1030→
+  1031→  1031→38. Mobile UX
+  1032→  1032→The application must work well on:
+  1033→  1033→
+  1034→  1034→Android
+  1035→  1035→iPhone
+  1036→  1036→Tablets
+  1037→  1037→Desktop
+  1038→  1038→On mobile:
+  1039→  1039→
+  1040→  1040→Large upload button
+  1041→  1041→Native file picker
+  1042→  1042→Touch-friendly controls
+  1043→  1043→Bottom-sheet format selector
+  1044→  1044→Progress UI
+  1045→  1045→Easy download/share
+  1046→  1046→
+  1047→  1047→39. Dark Mode
+  1048→  1048→Support:
+  1049→  1049→
+  1050→  1050→Light
+  1051→  1051→Dark
+  1052→  1052→System
+  1053→  1053→Make the interface visually polished.
+  1054→  1054→
+  1055→  1055→
+  1056→  1056→40. Authentication
+  1057→  1057→Optional account system.
+  1058→  1058→
+  1059→  1059→Users can:
+  1060→  1060→
+  1061→  1061→Sign up
+  1062→  1062→Sign in
+  1063→  1063→Sign out
+  1064→  1064→Reset password
+  1065→  1065→Manage profile
+  1066→  1066→But authentication must NOT be required for basic local conversions.
+  1067→  1067→
+  1068→  1068→Users should be able to use the converter as a guest.
+  1069→  1069→
+  1070→  1070→
+  1071→  1071→41. Free vs Paid SaaS
+  1072→  1072→Create a subscription architecture.
+  1073→  1073→
+  1074→  1074→Example:
+  1075→  1075→
+  1076→  1076→Free
+  1077→  1077→Local conversions
+  1078→  1078→Basic formats
+  1079→  1079→Limited batch size
+  1080→  1080→Basic tools
+  1081→  1081→Pro
+  1082→  1082→Larger batch conversions
+  1083→  1083→Advanced settings
+  1084→  1084→Advanced formats
+  1085→  1085→Priority feature access
+  1086→  1086→Conversion history metadata
+  1087→  1087→Saved preferences
+  1088→  1088→Remember:
+  1089→  1089→
+  1090→  1090→The Pro subscription must NOT require uploading files.
+  1091→  1091→
+  1092→  1092→
+  1093→  1093→42. Usage Limits
+  1094→  1094→Because processing is client-side, don't artificially pretend server-side usage is happening.
+  1095→  1095→
+  1096→  1096→Possible limits:
+  1097→  1097→
+  1098→  1098→Maximum simultaneous conversions
+  1099→  1099→Maximum batch count
+  1100→  1100→Advanced conversion availability
+  1101→  1101→Large-file processing
+  1102→  1102→Premium conversion engines
+  1103→  1103→Show clear limits.
+  1104→  1104→
+  1105→  1105→
+  1106→  1106→43. User Dashboard
+  1107→  1107→Create /dashboard.
+  1108→  1108→
+  1109→  1109→Sections:
+  1110→  1110→
+  1111→  1111→Overview
+  1112→  1112→Converter
+  1113→  1113→My Tools
+  1114→  1114→Favorites
+  1115→  1115→Recent Activity
+  1116→  1116→Subscription
+  1117→  1117→Settings
+  1118→  1118→Privacy
+  1119→  1119→
+  1120→  1120→Recent activity should preferably store only metadata locally unless the user explicitly enables cloud history.
+  1121→  1121→
+  1122→  1122→Example:
+  1123→  1123→
+  1124→  1124→Recent
+  1125→  1125→
+  1126→  1126→photo.heic → photo.jpg
+  1127→  1127→Today
+  1128→  1128→
+  1129→  1129→archive.tar → archive.zip
+  1130→  1130→Yesterday
+  1131→  1131→
+  1132→  1132→report.docx → report.pdf
+  1133→  1133→Yesterday
+  1134→  1134→
+  1135→  1135→
+  1136→  1136→44. Format Explorer
+  1137→  1137→Create /formats.
+  1138→  1138→
+  1139→  1139→Users can browse all supported formats.
+  1140→  1140→
+  1141→  1141→Categories:
+  1142→  1142→
+  1143→  1143→Documents
+  1144→  1144→Images
+  1145→  1145→Audio
+  1146→  1146→Video
+  1147→  1147→Archives
+  1148→  1148→eBooks
+  1149→  1149→3D
+  1150→  1150→Data
+  1151→  1151→Fonts
+  1152→  1152→Developer
+  1153→  1153→Subtitles
+  1154→  1154→GIS
+  1155→  1155→Scientific
+  1156→  1156→Each format page should explain:
+  1157→  1157→
+  1158→  1158→JPEG
+  1159→  1159→
+  1160→  1160→Extension:
+  1161→  1161→.jpg / .jpeg
+  1162→  1162→
+  1163→  1163→Category:
+  1164→  1164→Image
+  1165→  1165→
+  1166→  1166→Can convert to:
+  1167→  1167→PNG
+  1168→  1168→WebP
+  1169→  1169→AVIF
+  1170→  1170→TIFF
+  1171→  1171→PDF
+  1172→  1172→...
+  1173→  1173→
+  1174→  1174→Create SEO-friendly format pages.
+  1175→  1175→
+  1176→  1176→Examples:
+  1177→  1177→
+  1178→  1178→/convert/jpg-to-png
+  1179→  1179→/convert/png-to-webp
+  1180→  1180→/convert/pdf-to-jpg
+  1181→  1181→/convert/tar-to-zip
+  1182→  1182→/convert/zip-to-tar
+  1183→  1183→/convert/heic-to-jpg
+  1184→  1184→/convert/docx-to-pdf
+  1185→  1185→
+  1186→  1186→
+  1187→  1187→45. Search
+  1188→  1188→Add global search.
+  1189→  1189→
+  1190→  1190→User can type:
+  1191→  1191→
+  1192→  1192→tar to zip
+  1193→  1193→and immediately see:
+  1194→  1194→
+  1195→  1195→TAR → ZIP
+  1196→  1196→Or:
+  1197→  1197→
+  1198→  1198→heic
+  1199→  1199→and see:
+  1200→  1200→
+  1201→  1201→HEIC → JPG
+  1202→  1202→HEIC → PNG
+  1203→  1203→HEIC → WebP
+  1204→  1204→
+  1205→  1205→46. Favorites
+  1206→  1206→Allow users to favorite common conversions.
+  1207→  1207→
+  1208→  1208→Example:
+  1209→  1209→
+  1210→  1210→★ PDF → JPG
+  1211→  1211→★ HEIC → JPG
+  1212→  1212→★ TAR → ZIP
+  1213→  1213→★ DOCX → PDF
+  1214→  1214→
+  1215→  1215→
+  1216→  1216→47. Recent Conversions
+  1217→  1217→Store recent conversion metadata locally.
+  1218→  1218→
+  1219→  1219→Allow:
+  1220→  1220→
+  1221→  1221→Repeat conversion
+  1222→  1222→Clear history
+  1223→  1223→Delete individual history items
+  1224→  1224→Do not store actual files permanently unless explicitly requested.
+  1225→  1225→
+  1226→  1226→
+  1227→  1227→48. Accessibility
+  1228→  1228→Follow WCAG principles.
+  1229→  1229→
+  1230→  1230→Include:
+  1231→  1231→
+  1232→  1232→Keyboard navigation
+  1233→  1233→Screen reader labels
+  1234→  1234→Focus states
+  1235→  1235→Proper contrast
+  1236→  1236→Accessible drag-and-drop alternative
+  1237→  1237→Accessible progress indicators
+  1238→  1238→Reduced-motion support
+  1239→  1239→ARIA labels
+  1240→  1240→Semantic HTML
+  1241→  1241→
+  1242→  1242→49. Security
+  1243→  1243→Implement strong client-side security.
+  1244→  1244→
+  1245→  1245→Protect against:
+  1246→  1246→
+  1247→  1247→Malicious files
+  1248→  1248→Zip bombs
+  1249→  1249→Path traversal
+  1250→  1250→Memory exhaustion
+  1251→  1251→Decompression bombs
+  1252→  1252→Infinite archive nesting
+  1253→  1253→Malformed media
+  1254→  1254→Dangerous SVG content
+  1255→  1255→Malicious HTML previews
+  1256→  1256→XSS through converted files
+  1257→  1257→Never directly inject converted HTML into the application DOM without sanitization/sandboxing.
+  1258→  1258→
+  1259→  1259→Treat SVG and HTML as potentially unsafe.
+  1260→  1260→
+  1261→  1261→Use sandboxed previews where appropriate.
+  1262→  1262→
+  1263→  1263→
+  1264→  1264→50. Conversion Engine Architecture
+  1265→  1265→Create a common interface:
+  1266→  1266→
+  1267→  1267→interface ConversionEngine {
+  1268→  1268→id: string;
+  1269→  1269→name: string;
+  1270→  1270→
+  1271→  1271→canConvert(
+  1272→  1272→inputFormat: string,
+  1273→  1273→outputFormat: string
+  1274→  1274→): boolean;
+  1275→  1275→
+  1276→  1276→convert(
+  1277→  1277→input: File,
+  1278→  1278→options: ConversionOptions,
+  1279→  1279→onProgress: ProgressCallback
+  1280→  1280→): Promise<ConversionResult>;
+  1281→  1281→}
+  1282→  1282→
+  1283→  1283→Create separate engines for:
+  1284→  1284→
+  1285→  1285→ImageEngine
+  1286→  1286→DocumentEngine
+  1287→  1287→PdfEngine
+  1288→  1288→ArchiveEngine
+  1289→  1289→AudioEngine
+  1290→  1290→VideoEngine
+  1291→  1291→EbookEngine
+  1292→  1292→DataEngine
+  1293→  1293→ThreeDEngine
+  1294→  1294→FontEngine
+  1295→  1295→SubtitleEngine
+  1296→  1296→
+  1297→  1297→Load engines dynamically.
+  1298→  1298→
+  1299→  1299→Do not load video/audio/CAD WASM engines when the user is converting a simple JPG.
+  1300→  1300→
+  1301→  1301→
+  1302→  1302→51. WASM Strategy
+  1303→  1303→Use WASM where necessary.
+  1304→  1304→
+  1305→  1305→Important:
+  1306→  1306→
+  1307→  1307→Lazy-load WASM modules
+  1308→  1308→Cache WASM modules
+  1309→  1309→Run heavy processing in Web Workers
+  1310→  1310→Show loading state
+  1311→  1311→Show download size before loading very large engines where useful
+  1312→  1312→Release memory after conversion
+  1313→  1313→Example:
+  1314→  1314→
+  1315→  1315→User selects MP4 → MP3
+  1316→  1316→
+  1317→  1317→↓
+  1318→  1318→Load audio/video engine
+  1319→  1319→
+  1320→  1320→↓
+  1321→  1321→Initialize Worker
+  1322→  1322→
+  1323→  1323→↓
+  1324→  1324→Process locally
+  1325→  1325→
+  1326→  1326→↓
+  1327→  1327→Return Blob
+  1328→  1328→
+  1329→  1329→↓
+  1330→  1330→Download
+  1331→  1331→
+  1332→  1332→
+  1333→  1333→52. UI Design
+  1334→  1334→The design should be premium and minimal.
+  1335→  1335→
+  1336→  1336→Style inspiration:
+  1337→  1337→
+  1338→  1338→Linear
+  1339→  1339→Stripe
+  1340→  1340→Vercel
+  1341→  1341→Raycast
+  1342→  1342→Modern developer SaaS
+  1343→  1343→Avoid:
+  1344→  1344→
+  1345→  1345→Excessive gradients
+  1346→  1346→Clutter
+  1347→  1347→Huge unnecessary animations
+  1348→  1348→Confusing menus
+  1349→  1349→Use:
+  1350→  1350→
+  1351→  1351→Clean typography
+  1352→  1352→Rounded cards
+  1353→  1353→Subtle shadows
+  1354→  1354→Clear hierarchy
+  1355→  1355→Smooth transitions
+  1356→  1356→Professional icons
+  1357→  1357→Generous spacing
+  1358→  1358→
+  1359→  1359→53. Main Navigation
+  1360→  1360→Desktop:
+  1361→  1361→
+  1362→  1362→Logo
+  1363→  1363→
+  1364→  1364→Convert
+  1365→  1365→Tools
+  1366→  1366→Formats
+  1367→  1367→Pricing
+  1368→  1368→About
+  1369→  1369→
+  1370→  1370→[Sign In]
+  1371→  1371→[Get Started]
+  1372→  1372→
+  1373→  1373→Mobile:
+  1374→  1374→
+  1375→  1375→Logo ☰
+  1376→  1376→
+  1377→  1377→
+  1378→  1378→54. Tools Page
+  1379→  1379→Create categories:
+  1380→  1380→
+  1381→  1381→PDF Tools
+  1382→  1382→PDF → JPG
+  1383→  1383→PDF → PNG
+  1384→  1384→JPG → PDF
+  1385→  1385→Merge PDF
+  1386→  1386→Split PDF
+  1387→  1387→Compress PDF
+  1388→  1388→Image Tools
+  1389→  1389→JPG → PNG
+  1390→  1390→PNG → JPG
+  1391→  1391→HEIC → JPG
+  1392→  1392→WebP → JPG
+  1393→  1393→Image Compressor
+  1394→  1394→Resize Image
+  1395→  1395→Archive Tools
+  1396→  1396→TAR → ZIP
+  1397→  1397→ZIP → TAR
+  1398→  1398→RAR → ZIP
+  1399→  1399→ZIP → 7Z
+  1400→  1400→Extract ZIP
+  1401→  1401→Extract TAR
+  1402→  1402→Extract 7Z
+  1403→  1403→Media Tools
+  1404→  1404→MP4 → MP3
+  1405→  1405→Video → GIF
+  1406→  1406→Audio Converter
+  1407→  1407→Video Converter
+  1408→  1408→
+  1409→  1409→55. SEO
+  1410→  1410→Create strong SEO metadata.
+  1411→  1411→
+  1412→  1412→Target searches such as:
+  1413→  1413→
+  1414→  1414→online file converter
+  1415→  1415→free file converter
+  1416→  1416→PDF converter
+  1417→  1417→image converter
+  1418→  1418→JPG converter
+  1419→  1419→HEIC converter
+  1420→  1420→TAR to ZIP
+  1421→  1421→ZIP to TAR
+  1422→  1422→DOCX to PDF
+  1423→  1423→PDF to JPG
+  1424→  1424→MP4 to MP3
+  1425→  1425→WebP to JPG
+  1426→  1426→CSV to JSON
+  1427→  1427→JSON to CSV
+  1428→  1428→online archive converter
+  1429→  1429→Create individual landing pages for popular conversion pairs.
+  1430→  1430→
+  1431→  1431→
+  1432→  1432→56. No Fake Features
+  1433→  1433→Do not create UI buttons for conversions that aren't actually implemented.
+  1434→  1434→
+  1435→  1435→Every visible conversion must be connected to a real conversion engine.
+  1436→  1436→
+  1437→  1437→If an engine is unavailable:
+  1438→  1438→
+  1439→  1439→Coming soon
+  1440→  1440→
+  1441→  1441→or don't display it.
+  1442→  1442→
+  1443→  1443→
+  1444→  1444→57. Conversion Capability Labels
+  1445→  1445→Every format/conversion can have:
+  1446→  1446→
+  1447→  1447→✓ Browser
+  1448→  1448→✓ Private
+  1449→  1449→✓ Batch
+  1450→  1450→✓ Preview
+  1451→  1451→
+  1452→  1452→Example:
+  1453→  1453→
+  1454→  1454→TAR → ZIP
+  1455→  1455→
+  1456→  1456→✓ Runs in browser
+  1457→  1457→✓ Private
+  1458→  1458→✓ Batch
+  1459→  1459→✓ No upload
+  1460→  1460→
+  1461→  1461→
+  1462→  1462→58. Progress Experience
+  1463→  1463→For every conversion:
+  1464→  1464→
+  1465→  1465→Preparing...
+  1466→  1466→Loading conversion engine...
+  1467→  1467→Reading file...
+  1468→  1468→Processing...
+  1469→  1469→Finalizing...
+  1470→  1470→Complete!
+  1471→  1471→
+  1472→  1472→Don't fake progress.
+  1473→  1473→
+  1474→  1474→If exact progress isn't available, use an indeterminate progress indicator rather than displaying fake percentages.
+  1475→  1475→
+  1476→  1476→
+  1477→  1477→59. Preview
+  1478→  1478→Preview converted files where possible.
+  1479→  1479→
+  1480→  1480→Images:
+  1481→  1481→
+  1482→  1482→Full preview
+  1483→  1483→Zoom
+  1484→  1484→Dimensions
+  1485→  1485→File size
+  1486→  1486→PDF:
+  1487→  1487→
+  1488→  1488→Page preview
+  1489→  1489→Audio:
+  1490→  1490→
+  1491→  1491→Audio player
+  1492→  1492→Duration
+  1493→  1493→Waveform if practical
+  1494→  1494→Video:
+  1495→  1495→
+  1496→  1496→Video player
+  1497→  1497→Resolution
+  1498→  1498→Duration
+  1499→  1499→Text/data:
+  1500→  1500→
+  1501→  1501→Text/data preview
+  1502→  1502→3D:
+  1503→  1503→
+  1504→  1504→Interactive model viewer
+  1505→  1505→
+  1506→  1506→60. Before / After
+  1507→  1507→For image conversions show:
+  1508→  1508→
+  1509→  1509→BEFORE
+  1510→  1510→photo.heic
+  1511→  1511→2.8 MB
+  1512→  1512→4032 × 3024
+  1513→  1513→
+  1514→  1514→↓
+  1515→  1515→
+  1516→  1516→AFTER
+  1517→  1517→photo.jpg
+  1518→  1518→1.2 MB
+  1519→  1519→4032 × 3024
+  1520→  1520→
+  1521→  1521→Show compression percentage when meaningful.
+  1522→  1522→
+  1523→  1523→
+  1524→  1524→61. Privacy Page
+  1525→  1525→Create a detailed privacy page explaining:
+  1526→  1526→
+  1527→  1527→Files are processed locally
+  1528→  1528→Files are not uploaded for conversion
+  1529→  1529→Temporary browser data may exist
+  1530→  1530→Users can clear local data
+  1531→  1531→Analytics do not receive file contents
+  1532→  1532→Third-party services should not receive file contents
+  1533→  1533→Limitations of browser security
+  1534→  1534→Be transparent.
+  1535→  1535→
+  1536→  1536→
+  1537→  1537→62. Terms / Legal
+  1538→  1538→Create:
+  1539→  1539→
+  1540→  1540→Terms of Service
+  1541→  1541→Privacy Policy
+  1542→  1542→Cookie Policy if applicable
+  1543→  1543→Refund Policy
+  1544→  1544→Acceptable Use Policy
+  1545→  1545→Do not claim absolute security or privacy guarantees.
+  1546→  1546→
+  1547→  1547→
+  1548→  1548→63. Pricing Page
+  1549→  1549→Create:
+  1550→  1550→
+  1551→  1551→Free
+  1552→  1552→$0
+  1553→  1553→
+  1554→  1554→Pro
+  1555→  1555→$X/month
+  1556→  1556→
+  1557→  1557→Business
+  1558→  1558→$X/month
+  1559→  1559→
+  1560→  1560→The exact pricing can be configurable.
+  1561→  1561→
+  1562→  1562→Highlight:
+  1563→  1563→
+  1564→  1564→Browser processing
+  1565→  1565→Batch processing
+  1566→  1566→Advanced formats
+  1567→  1567→Large files
+  1568→  1568→Premium tools
+  1569→  1569→
+  1570→  1570→64. Settings
+  1571→  1571→Include:
+  1572→  1572→
+  1573→  1573→Appearance
+  1574→  1574→Theme
+  1575→  1575→Language
+  1576→  1576→Conversion
+  1577→  1577→Default output format
+  1578→  1578→Auto-download
+  1579→  1579→Preserve metadata
+  1580→  1580→Compression defaults
+  1581→  1581→Privacy
+  1582→  1582→Clear local history
+  1583→  1583→Clear cached engines
+  1584→  1584→Clear local data
+  1585→  1585→Account
+  1586→  1586→Profile
+  1587→  1587→Subscription
+  1588→  1588→Logout
+  1589→  1589→
+  1590→  1590→65. Internationalization
+  1591→  1591→Prepare the application for multiple languages.
+  1592→  1592→
+  1593→  1593→Do not hard-code UI text.
+  1594→  1594→
+  1595→  1595→Use translation keys.
+  1596→  1596→
+  1597→  1597→Start with:
+  1598→  1598→
+  1599→  1599→English
+  1600→  1600→Structure the code so additional languages can be added later.
+  1601→  1601→
+  1602→  1602→
+  1603→  1603→66. Notifications
+  1604→  1604→Use non-intrusive toast notifications.
+  1605→  1605→
+  1606→  1606→Examples:
+  1607→  1607→
+  1608→  1608→Conversion complete
+  1609→  1609→4 files converted successfully
+  1610→  1610→Conversion failed
+  1611→  1611→File removed
+  1612→  1612→Local data cleared
+  1613→  1613→
+  1614→  1614→67. Empty States
+  1615→  1615→Create polished empty states.
+  1616→  1616→
+  1617→  1617→Example:
+  1618→  1618→
+  1619→  1619→No files yet
+  1620→  1620→
+  1621→  1621→Drop a file here to start converting.
+  1622→  1622→
+  1623→  1623→History:
+  1624→  1624→
+  1625→  1625→No recent conversions
+  1626→  1626→
+  1627→  1627→Your recent local conversions will appear here.
+  1628→  1628→
+  1629→  1629→
+  1630→  1630→68. Loading States
+  1631→  1631→Use skeleton loaders for:
+  1632→  1632→
+  1633→  1633→Format pages
+  1634→  1634→Dashboard
+  1635→  1635→Tool pages
+  1636→  1636→For conversion engines:
+  1637→  1637→
+  1638→  1638→Preparing converter...
+  1639→  1639→
+  1640→  1640→
+  1641→  1641→69. Responsive Layout
+  1642→  1642→Desktop:
+  1643→  1643→
+  1644→  1644→Two-column conversion layout where useful
+  1645→  1645→Tablet:
+  1646→  1646→
+  1647→  1647→Responsive cards
+  1648→  1648→Mobile:
+  1649→  1649→
+  1650→  1650→Single-column
+  1651→  1651→Bottom sheets
+  1652→  1652→Large buttons
+  1653→  1653→Sticky conversion action
+  1654→  1654→
+  1655→  1655→70. Performance
+  1656→  1656→Performance is extremely important.
+  1657→  1657→
+  1658→  1658→Implement:
+  1659→  1659→
+  1660→  1660→Code splitting
+  1661→  1661→Dynamic imports
+  1662→  1662→Lazy-loaded conversion engines
+  1663→  1663→WASM lazy loading
+  1664→  1664→Web Workers
+  1665→  1665→Image virtualization
+  1666→  1666→Efficient memory management
+  1667→  1667→Blob URL cleanup
+  1668→  1668→Avoid unnecessary React renders
+  1669→  1669→The homepage should NOT load every conversion engine.
+  1670→  1670→
+  1671→  1671→
+  1672→  1672→71. Analytics
+  1673→  1673→Analytics should measure product usage without collecting file contents.
+  1674→  1674→
+  1675→  1675→Allowed events:
+  1676→  1676→
+  1677→  1677→conversion_started
+  1678→  1678→conversion_completed
+  1679→  1679→conversion_failed
+  1680→  1680→format_selected
+  1681→  1681→tool_opened
+  1682→  1682→pricing_viewed
+  1683→  1683→signup_completed
+  1684→  1684→
+  1685→  1685→Do NOT send:
+  1686→  1686→
+  1687→  1687→file contents
+  1688→  1688→document text
+  1689→  1689→image data
+  1690→  1690→audio data
+  1691→  1691→video data
+  1692→  1692→
+  1693→  1693→Consider anonymizing filenames if analytics needs them at all.
+  1694→  1694→
+  1695→  1695→Prefer not to send filenames.
+  1696→  1696→
+  1697→  1697→
+  1698→  1698→72. Error Monitoring
+  1699→  1699→Track application errors without uploading user files.
+  1700→  1700→
+  1701→  1701→Error reports must be scrubbed of:
+  1702→  1702→
+  1703→  1703→File contents
+  1704→  1704→File paths
+  1705→  1705→Personal information
+  1706→  1706→Filenames where possible
+  1707→  1707→
+  1708→  1708→73. File Size UX
+  1709→  1709→Show:
+  1710→  1710→
+  1711→  1711→12.4 MB
+  1712→  1712→
+  1713→  1713→Use human-readable formatting.
+  1714→  1714→
+  1715→  1715→For very large files:
+  1716→  1716→
+  1717→  1717→Large file detected
+  1718→  1718→
+  1719→  1719→This conversion may use significant device memory.
+  1720→  1720→
+  1721→  1721→Allow the user to cancel.
+  1722→  1722→
+  1723→  1723→
+  1724→  1724→74. Cancellation
+  1725→  1725→Every long conversion should support cancellation where technically possible.
+  1726→  1726→
+  1727→  1727→Example:
+  1728→  1728→
+  1729→  1729→Converting...
+  1730→  1730→
+  1731→  1731→████████░░ 82%
+  1732→  1732→
+  1733→  1733→[ Cancel ]
+  1734→  1734→
+  1735→  1735→After cancellation:
+  1736→  1736→
+  1737→  1737→Conversion cancelled. Temporary data was cleared.
+  1738→  1738→
+  1739→  1739→75. Retry
+  1740→  1740→If a conversion fails:
+  1741→  1741→
+  1742→  1742→Conversion failed
+  1743→  1743→
+  1744→  1744→[ Retry ]
+  1745→  1745→[ Try Another Format ]
+  1746→  1746→[ Remove ]
+  1747→  1747→
+  1748→  1748→
+  1749→  1749→76. Accessibility of File Input
+  1750→  1750→Always provide a standard file picker.
+  1751→  1751→
+  1752→  1752→Do not make drag-and-drop the only method.
+  1753→  1753→
+  1754→  1754→Use:
+  1755→  1755→
+  1756→  1756→<input type="file">
+  1757→  1757→
+  1758→  1758→with proper accessibility labeling.
+  1759→  1759→
+  1760→  1760→
+  1761→  1761→77. Testing
+  1762→  1762→Create tests for:
+  1763→  1763→
+  1764→  1764→Format detection
+  1765→  1765→Conversion registry
+  1766→  1766→Compatibility matrix
+  1767→  1767→Filename generation
+  1768→  1768→MIME detection
+  1769→  1769→Archive extraction
+  1770→  1770→Archive conversion
+  1771→  1771→Error handling
+  1772→  1772→Cancellation
+  1773→  1773→Batch processing
+  1774→  1774→Large files
+  1775→  1775→Worker communication
+  1776→  1776→WASM loading
+  1777→  1777→Memory cleanup
+  1778→  1778→Test across:
+  1779→  1779→
+  1780→  1780→Chrome
+  1781→  1781→Firefox
+  1782→  1782→Safari
+  1783→  1783→Edge
+  1784→  1784→Mobile Safari
+  1785→  1785→Android Chrome
+  1786→  1786→
+  1787→  1787→78. Project Structure
+  1788→  1788→Use a clean architecture similar to:
+  1789→  1789→
+  1790→  1790→src/
+  1791→  1791→├── app/
+  1792→  1792→│ ├── page
+  1793→  1793→│ ├── convert/
+  1794→  1794→│ ├── tools/
+  1795→  1795→│ ├── formats/
+  1796→  1796→│ ├── pricing/
+  1797→  1797→│ ├── dashboard/
+  1798→  1798→│ └── settings/
+  1799→  1799→│
+  1800→  1800→├── components/
+  1801→  1801→│ ├── converter/
+  1802→  1802→│ ├── uploader/
+  1803→  1803→│ ├── format-selector/
+  1804→  1804→│ ├── progress/
+  1805→  1805→│ ├── preview/
+  1806→  1806→│ ├── archive/
+  1807→  1807→│ └── ui/
+  1808→  1808→│
+  1809→  1809→├── conversion/
+  1810→  1810→│ ├── registry/
+  1811→  1811→│ ├── engines/
+  1812→  1812→│ │ ├── image/
+  1813→  1813→│ │ ├── pdf/
+  1814→  1814→│ │ ├── document/
+  1815→  1815→│ │ ├── audio/
+  1816→  1816→│ │ ├── video/
+  1817→  1817→│ │ ├── archive/
+  1818→  1818→│ │ ├── ebook/
+  1819→  1819→│ │ ├── data/
+  1820→  1820→│ │ └── 3d/
+  1821→  1821→│ ├── workers/
+  1822→  1822→│ └── utils/
+  1823→  1823→│
+  1824→  1824→├── lib/
+  1825→  1825→├── hooks/
+  1826→  1826→├── types/
+  1827→  1827→├── config/
+  1828→  1828→└── styles/
+  1829→  1829→
+  1830→  1830→
+  1831→  1831→79. Important Product Rule
+  1832→  1832→Never advertise:
+  1833→  1833→
+  1834→  1834→“Every format converts to every other format.”
+  1835→  1835→Instead advertise:
+  1836→  1836→
+  1837→  1837→Convert hundreds of file formats with intelligent compatibility matching.
+  1838→  1838→The application should intelligently determine which conversions are technically meaningful and available.
+  1839→  1839→
+  1840→  1840→
+  1841→  1841→80. Final UX Flow
+  1842→  1842→The ideal user experience should be:
+  1843→  1843→
+  1844→  1844→User visits website
+  1845→  1845→↓
+  1846→  1846→Drops file
+  1847→  1847→↓
+  1848→  1848→Application detects format
+  1849→  1849→↓
+  1850→  1850→Shows compatible formats
+  1851→  1851→↓
+  1852→  1852→User selects output
+  1853→  1853→↓
+  1854→  1854→Optional advanced settings
+  1855→  1855→↓
+  1856→  1856→User clicks Convert
+  1857→  1857→↓
+  1858→  1858→Conversion engine loads locally
+  1859→  1859→↓
+  1860→  1860→Web Worker processes file
+  1861→  1861→↓
+  1862→  1862→Progress displayed
+  1863→  1863→↓
+  1864→  1864→Conversion completes
+  1865→  1865→↓
+  1866→  1866→Preview shown
+  1867→  1867→↓
+  1868→  1868→Download button
+  1869→  1869→↓
+  1870→  1870→Temporary browser resources cleaned
+  1871→  1871→
+  1872→  1872→
+  1873→  1873→81. Most Important Requirements
+  1874→  1874→Prioritize these above everything else:
+  1875→  1875→
+  1876→  1876→No file upload for conversion
+  1877→  1877→Client-side processing
+  1878→  1878→Real conversions, not mocked functionality
+  1879→  1879→Web Workers for heavy processing
+  1880→  1880→WASM engines where necessary
+  1881→  1881→Automatic file detection
+  1882→  1882→Intelligent output compatibility
+  1883→  1883→Batch conversion
+  1884→  1884→ZIP/TAR/archive support
+  1885→  1885→TAR → ZIP must work
+  1886→  1886→ZIP → TAR must work
+  1887→  1887→Archive extraction
+  1888→  1888→Progress tracking
+  1889→  1889→Cancellation
+  1890→  1890→Retry
+  1891→  1891→Preview
+  1892→  1892→Download all
+  1893→  1893→Responsive mobile UX
+  1894→  1894→Dark mode
+  1895→  1895→Accessibility
+  1896→  1896→Privacy-first design
+  1897→  1897→Strong security around untrusted files
+  1898→  1898→Lazy loading of heavy engines
+  1899→  1899→Large-file handling
+  1900→  1900→Production-quality error handling
+  1901→  1901→SEO-friendly conversion pages
+  1902→  1902→SaaS authentication and billing architecture without requiring file uploads
+  1903→  1903→No fake conversion buttons
+  1904→  1904→No fake progress
+  1905→  1905→Clean modular conversion-engine architecture
+  1906→  1906→
+  1907→  1907→
+  1908→  1908→
+  1909→  1909→Design : 
+  1910→  1910→<!DOCTYPE html>
+  1911→  1911→
+  1912→  1912→<html lang="en"><head>
+  1913→  1913→<meta charset="utf-8"/>
+  1914→  1914→<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  1915→  1915→<link href="https://fonts.googleapis.com" rel="preconnect"/>
+  1916→  1916→<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  1917→  1917→<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+  1918→  1918→<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  1919→  1919→<style>
+  1920→  1920→@layer base {
+  1921→  1921→html, body { margin: 0; padding: 0; }
+  1922→  1922→body { overscroll-behavior: none; }
+  1923→  1923→main > :first-child { margin-top: 0 !important; }
+  1924→  1924→main > :last-child { margin-bottom: 0 !important; }
+  1925→  1925→}
+  1926→  1926→::-webkit-scrollbar { display: none; }
+  1927→  1927→</style>
+  1928→  1928→<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  1929→  1929→<script id="tailwind-config">
+  1930→  1930→tailwind.config = {
+  1931→  1931→darkMode: "class",
+  1932→  1932→theme: {
+  1933→  1933→extend: {
+  1934→  1934→colors: {
+  1935→  1935→"canvas": "#F4F3F1",
+  1936→  1936→"background": "#F4F3F1",
+  1937→  1937→"surface": "#FFFFFF",
+  1938→  1938→"surface-container": "#FFFFFF",
+  1939→  1939→"surface-container-low": "#F8F7F5",
+  1940→  1940→"surface-container-high": "#F0EFEB",
+  1941→  1941→"surface-container-highest": "#E7E5E0",
+  1942→  1942→"surface-container-lowest": "#FFFFFF",
+  1943→  1943→"primary": "#A9473C",
+  1944→  1944→"on-primary": "#FFFFFF",
+  1945→  1945→"accent-light": "#E8D3CF",
+  1946→  1946→"border-rule": "#DCDAD6",
+  1947→  1947→"outline-variant": "#DCDAD6",
+  1948→  1948→"outline": "#6F6F6B",
+  1949→  1949→"on-surface": "#151515",
+  1950→  1950→"on-surface-variant": "#6F6F6B",
+  1951→  1951→"secondary": "#8F3A30",
+  1952→  1952→"error": "#BA1A1A",
+  1953→  1953→"error-container": "#FFDAD6",
+  1954→  1954→"on-error-container": "#93000A"
+  1955→  1955→},
+  1956→  1956→borderRadius: {
+  1957→  1957→"DEFAULT": "0.125rem",
+  1958→  1958→"lg": "0.25rem",
+  1959→  1959→"xl": "0.5rem",
+  1960→  1960→"full": "0.75rem"
+  1961→  1961→},
+  1962→  1962→spacing: {
+  1963→  1963→"space-lg": "1.5rem",
+  1964→  1964→"margin": "1rem",
+  1965→  1965→"gutter": "1rem",
+  1966→  1966→"gutter-lg": "1.5rem",
+  1967→  1967→"space-xl": "2.5rem",
+  1968→  1968→"space-xs": "0.25rem",
+  1969→  1969→"space-md": "1rem",
+  1970→  1970→"margin-md": "2rem",
+  1971→  1971→"space-sm": "0.5rem",
+  1972→  1972→"margin-lg": "3rem"
+  1973→  1973→},
+  1974→  1974→fontFamily: {
+  1975→  1975→"body-lg": ["Inter", "sans-serif"],
+  1976→  1976→"headline-lg-mobile": ["Inter", "sans-serif"],
+  1977→  1977→"display": ["Inter", "sans-serif"],
+  1978→  1978→"mono-code": ["JetBrains Mono", "monospace"],
+  1979→  1979→"headline-lg": ["Inter", "sans-serif"],
+  1980→  1980→"body-md": ["Inter", "sans-serif"],
+  1981→  1981→"mono-md": ["JetBrains Mono", "monospace"],
+  1982→  1982→"mono-sm": ["JetBrains Mono", "monospace"],
+  1983→  1983→"display-mobile": ["Inter", "sans-serif"],
+  1984→  1984→"headline-sm": ["Inter", "sans-serif"],
+  1985→  1985→"mono-lg": ["JetBrains Mono", "monospace"],
+  1986→  1986→"headline-md": ["Inter", "sans-serif"],
+  1987→  1987→"body-sm": ["Inter", "sans-serif"]
+  1988→  1988→},
+  1989→  1989→fontSize: {
+  1990→  1990→"body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "400" }],
+  1991→  1991→"headline-lg-mobile": ["26px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" }],
+  1992→  1992→"display": ["46px", { lineHeight: "52px", letterSpacing: "-0.03em", fontWeight: "700" }],
+  1993→  1993→"mono-code": ["12px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+  1994→  1994→"headline-lg": ["32px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "600" }],
+  1995→  1995→"body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }],
+  1996→  1996→"mono-md": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "500" }],
+  1997→  1997→"mono-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }],
+  1998→  1998→"display-mobile": ["34px", { lineHeight: "40px", letterSpacing: "-0.025em", fontWeight: "700" }],
+  1999→  1999→"headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600" }],
+  2000→  2000→"mono-lg": ["15px", { lineHeight: "20px", letterSpacing: "-0.01em", fontWeight: "500" }],
+
+[showing lines 1-2000 of 2002; use offset=2001 with limit to continue reading]

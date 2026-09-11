@@ -1,0 +1,2609 @@
+Build a Production-Ready Browser-Only File Conversion SaaS
+Build a modern SaaS web application for client-side file conversion. The core product is a privacy-first “Convert Anything” file conversion platform where files are processed entirely inside the user's browser whenever technically possible.
+
+The application must NOT upload user files to our servers for conversion.
+
+The product should feel polished, fast, trustworthy, modern, and production-ready — not like a basic file-upload utility.
+
+
+1. Core Product Concept
+Create a SaaS platform where a user can:
+
+Select or drag-and-drop one or multiple files.
+Automatically detect each file's format.
+Select a compatible output format.
+Convert the file directly inside the browser.
+See real-time conversion progress.
+Preview the result when possible.
+Download the converted file.
+Download multiple converted files as a ZIP.
+Convert multiple files in batch.
+Perform archive operations such as ZIP/TAR/7Z conversions and extraction.
+Never send the user's actual file contents to a conversion backend.
+The main selling point is:
+
+Your files stay on your device.
+Use privacy as a major part of the product experience.
+
+
+2. Important Architecture Requirement
+The application must be frontend-first / browser-only for file processing.
+
+Do NOT create a backend API that receives uploaded files for conversion.
+
+All supported conversions should run locally using:
+
+JavaScript
+Web APIs
+Web Workers
+WebAssembly
+Client-side libraries
+Browser-native APIs where appropriate
+Use Web Workers for CPU-heavy operations so that the UI remains responsive.
+
+Large files must not block the main browser thread.
+
+If a conversion cannot reliably be performed locally, clearly mark it as:
+
+“Not supported in browser”
+rather than secretly uploading the file to a server.
+
+
+
+The architecture should separate:
+
+SaaS Account Data
+↓
+Authentication / Billing
+
+User File
+↓
+Browser
+↓
+Local Conversion Engine
+↓
+Downloaded Result
+
+Never mix the two.
+
+
+4. Recommended Technology Stack
+Use a modern production-ready stack.
+
+Preferred:
+
+Next.js
+React
+TypeScript
+Tailwind CSS
+shadcn/ui or equivalent polished component system
+Web Workers
+WebAssembly
+IndexedDB for optional local temporary state
+PWA support if practical
+Use modular conversion engines so additional formats can be added later.
+
+Do not hard-code conversion logic into UI components.
+
+Create a conversion registry.
+
+Example conceptual structure:
+
+ConversionRegistry
+├── image
+├── document
+├── audio
+├── video
+├── archive
+├── ebook
+├── data
+├── 3d
+├── font
+├── subtitle
+├── gis
+└── developer
+
+
+5. Homepage
+Create a premium SaaS landing page.
+
+Hero section:
+
+Headline:
+
+Convert Files. Privately. Right in Your Browser.
+Subheadline:
+
+Convert documents, images, audio, video, archives, eBooks, data and more without uploading your files.
+Primary CTA:
+
+Start Converting
+Secondary CTA:
+
+Explore Formats
+Show a large central drag-and-drop conversion area.
+
+Example:
+
+┌──────────────────────────────────────────────┐
+│ │
+│ Drop files here │
+│ │
+│ or │
+│ │
+│ [ Choose Files ] │
+│ │
+│ Your files never leave your device │
+│ │
+└──────────────────────────────────────────────┘
+
+
+6. Homepage Feature Sections
+Include:
+
+Private by Design
+Explain:
+
+Files are processed locally in your browser. We don't need to upload your files to convert them.
+Hundreds of Formats
+Show categories:
+
+Documents
+Images
+Audio
+Video
+Archives
+eBooks
+Data
+3D
+Fonts
+Developer
+Subtitles
+GIS
+Batch Conversion
+Explain that users can convert multiple files at once.
+
+No Installation
+Everything works directly from the browser.
+
+Fast Local Processing
+Use Web Workers and WASM where appropriate.
+
+
+7. Main Converter Interface
+Create /convert.
+
+Layout:
+
+Header
+
+Convert Files
+
+[ Drop files here ]
+
+or
+
+[ Choose Files ]
+
+Supported formats
+
+Recent conversions / current queue
+
+After uploading:
+
+Files
+────────────────────────────────────
+
+photo.heic
+HEIC
+2.4 MB
+
+Convert to:
+[ JPG ▼ ]
+
+[ Convert ]
+
+────────────────────────────────────
+
+document.pdf
+PDF
+8.7 MB
+
+Convert to:
+[ DOCX ▼ ]
+
+[ Convert ]
+
+
+8. Drag & Drop
+Support:
+
+Drag files onto page
+Drag multiple files
+Drag folders if browser supports it
+Click to browse
+Clipboard paste where technically possible
+Mobile file picker
+Show visual drag state:
+
+Drop your files to start converting
+
+Reject unsupported files with a friendly error.
+
+
+9. Automatic Format Detection
+Do not rely only on filename extensions.
+
+Use:
+
+Extension
+MIME type
+File signature / magic bytes where possible
+Example:
+
+photo.jpg
+Detected:
+JPEG Image
+
+If extension and actual file type disagree:
+
+We detected the file as PNG even though its filename ends in .jpg.
+
+Allow the user to continue only if safe.
+
+
+10. Output Format Selector
+The output selector should ONLY show compatible formats.
+
+Do not show every format for every input.
+
+For example:
+
+Input: JPG
+Show:
+
+PNG
+WebP
+AVIF
+TIFF
+BMP
+GIF
+PDF
+SVG where conversion makes sense
+Input: PDF
+Show:
+
+JPG
+PNG
+WebP
+TIFF
+TXT
+HTML
+SVG where supported
+EPUB where supported
+Input: TAR
+Show:
+
+ZIP
+7Z
+TAR.GZ
+TAR.BZ2
+TAR.XZ
+Input: ZIP
+Show:
+
+TAR
+TAR.GZ
+TAR.BZ2
+TAR.XZ
+7Z
+The compatibility matrix must be data-driven.
+
+
+11. Conversion Matrix
+Create a central registry such as:
+
+{
+input: "tar",
+outputs: [
+"zip",
+"7z",
+"tar.gz",
+"tar.bz2",
+"tar.xz"
+]
+}
+
+Every conversion engine must register:
+
+Input format
+Output formats
+MIME types
+File extensions
+Engine
+Whether WASM is required
+Maximum recommended size
+Whether batch processing is supported
+Whether preview is supported
+
+12. Supported Format Categories
+Implement the format registry with the following formats.
+
+Documents
+PDF
+DOC
+DOCX
+DOCM
+XLS
+XLSX
+XLSM
+PPT
+PPTX
+PPTM
+ODT
+ODS
+ODP
+RTF
+TXT
+MD
+Markdown
+CSV
+TSV
+HTML
+HTM
+XML
+EPUB
+MOBI
+AZW
+AZW3
+DJVU
+TEX
+JSON
+YAML
+YML
+TOML
+INI
+
+13. Image Formats
+Common
+JPG
+JPEG
+PNG
+GIF
+WebP
+BMP
+TIFF
+TIF
+SVG
+ICO
+HEIC
+HEIF
+AVIF
+Professional
+RAW
+PSD
+AI
+EPS
+TGA
+DDS
+EXR
+HDR
+JP2
+J2K
+JXL
+XCF
+Camera RAW
+CR2
+CR3
+NEF
+ARW
+ORF
+RW2
+RAF
+DNG
+Only expose conversions that can actually be performed reliably in-browser.
+
+
+14. Audio Formats
+Support where browser/WASM engines allow:
+
+MP3
+WAV
+AAC
+M4A
+FLAC
+OGG
+OPUS
+WMA
+AIFF
+AIF
+ALAC
+AMR
+MIDI
+MID
+AC3
+DTS
+MKA
+APE
+Provide options such as:
+
+Bitrate
+Sample rate
+Channels
+Quality
+Output filename
+Only show options relevant to the selected output format.
+
+
+15. Video Formats
+Support through a client-side media engine where technically feasible:
+
+MP4
+MKV
+AVI
+MOV
+WebM
+WMV
+FLV
+MPEG
+MPG
+M4V
+3GP
+3G2
+TS
+MTS
+M2TS
+OGV
+VOB
+MXF
+ASF
+Provide:
+
+Resolution
+Codec
+Bitrate
+FPS
+Audio codec
+Audio bitrate
+Quality
+Trim start/end
+Remove audio
+Extract audio
+Generate GIF
+Do not load massive conversion engines until needed.
+
+Use lazy loading.
+
+
+16. Archive Formats
+This is a major feature.
+
+Support:
+
+ZIP
+TAR
+GZ
+TAR.GZ
+TGZ
+BZ2
+TAR.BZ2
+TBZ2
+XZ
+TAR.XZ
+TXZ
+7Z
+RAR
+Z
+TAR.Z
+ZST
+BR
+LZ
+LZMA
+LZH
+CAB
+ARJ
+ACE
+CPIO
+ISO
+DMG
+WIM
+XAR
+ZPAQ
+
+17. Archive Conversion
+Explicitly support:
+
+TAR → ZIP
+ZIP → TAR
+
+TAR → 7Z
+7Z → TAR
+
+TAR.GZ → ZIP
+ZIP → TAR.GZ
+
+TAR.BZ2 → ZIP
+ZIP → TAR.BZ2
+
+TAR.XZ → ZIP
+ZIP → TAR.XZ
+
+ZIP → 7Z
+7Z → ZIP
+
+RAR → ZIP
+RAR → 7Z
+
+GZ → ZIP
+BZ2 → ZIP
+XZ → ZIP
+
+Where direct creation/extraction is technically supported.
+
+If an archive format cannot be created due to library/licensing/technical restrictions, support extraction where possible and clearly indicate the limitation.
+
+
+18. Archive Extraction
+Add a separate:
+
+Extract Archive
+feature.
+
+Example:
+
+Drop archive here
+
+ZIP
+TAR
+RAR
+7Z
+GZ
+...
+
+[ Extract ]
+
+Show contents before extraction:
+
+my-project.zip
+
+127 files
+18 folders
+42.7 MB
+
+├── src/
+├── public/
+├── package.json
+└── README.md
+
+[ Extract All ]
+
+Allow:
+
+Extract all
+Select individual files
+Download selected files
+Download extracted folder as ZIP
+Use safe archive extraction practices.
+
+Protect against:
+
+Zip bombs
+Path traversal
+Excessive memory use
+Malicious filenames
+Extremely nested archives
+
+19. Document Conversion
+Where browser-compatible libraries exist, support:
+
+DOCX → PDF
+PDF → images
+PDF → TXT
+PDF → HTML
+TXT → PDF
+HTML → PDF
+Markdown → HTML
+Markdown → PDF
+CSV → XLSX
+XLSX → CSV
+JSON → CSV
+CSV → JSON
+JSON → YAML
+YAML → JSON
+XML → JSON
+Do not claim pixel-perfect office conversion unless the actual engine can provide it.
+
+
+20. eBook Conversion
+Support:
+
+EPUB
+MOBI
+AZW
+AZW3
+FB2
+CBZ
+CBR
+Possible conversions:
+
+EPUB → PDF
+EPUB → TXT
+EPUB → HTML
+
+MOBI → EPUB
+MOBI → PDF
+
+AZW3 → EPUB
+
+DRM-protected files must not be processed.
+
+
+21. 3D Conversion
+Registry should include:
+
+STL
+OBJ
+FBX
+GLTF
+GLB
+3DS
+BLEND
+STEP
+STP
+IGES
+IGS
+DWG
+DXF
+DAE
+PLY
+OFF
+3MF
+AMF
+WRL
+X3D
+USD
+USDA
+USDC
+USDZ
+Show a 3D preview where possible.
+
+Support:
+
+Rotate
+Zoom
+Pan
+Wireframe
+Solid view
+Background color
+Model statistics
+Only expose conversions actually implemented.
+
+
+22. Font Conversion
+Include:
+
+TTF
+OTF
+WOFF
+WOFF2
+EOT
+TTC
+FON
+Show font metadata when possible.
+
+
+23. Data Conversion
+Support:
+
+CSV
+TSV
+JSON
+JSONL
+NDJSON
+XML
+YAML
+TOML
+SQL
+SQLite
+SQLite3
+DB
+Parquet
+Avro
+ORC
+Feather
+Provide a data preview.
+
+Example:
+
+Rows: 25,431
+Columns: 18
+
+┌────────┬─────────┬─────────┐
+│ Name │ Email │ Country │
+├────────┼─────────┼─────────┤
+│ John │ ... │ USA │
+└────────┴─────────┴─────────┘
+
+
+24. CSV Tools
+CSV conversion should have advanced options:
+
+Delimiter
+Encoding
+Header detection
+Quote character
+Escape character
+Line ending
+Column selection
+Preview
+JSON output structure
+
+25. PDF Tools
+In addition to conversion, create:
+
+PDF → JPG
+PDF → PNG
+PDF → WebP
+PDF → TIFF
+Images → PDF
+Merge PDFs
+Split PDF
+Extract pages
+Reorder pages
+Rotate pages
+Compress PDF where feasible
+PDF metadata viewer
+PDF page preview
+Create a dedicated PDF tools section.
+
+
+26. Image Tools
+Add:
+
+Resize
+Crop
+Rotate
+Flip
+Compress
+Change quality
+Remove metadata where possible
+Convert format
+Change dimensions
+Grayscale
+Generate favicon
+Image → PDF
+Allow users to process multiple images at once.
+
+
+27. Batch Conversion
+Allow:
+
+photo1.heic
+photo2.heic
+photo3.heic
+photo4.heic
+
+Choose:
+
+Convert all to:
+[ JPG ]
+
+Then:
+
+4 files
+[ Convert All ]
+
+Show individual progress:
+
+photo1.heic ██████████ 100%
+photo2.heic ███████░░░ 70%
+photo3.heic ████░░░░░░ 40%
+photo4.heic Waiting
+
+Allow:
+
+Pause
+Resume
+Cancel
+Retry failed
+Download individually
+Download all as ZIP
+
+28. Conversion Queue
+Create a robust queue system.
+
+Each job should have:
+
+Filename
+Input format
+Output format
+File size
+Status
+Progress
+Speed
+Estimated remaining time
+Output size
+Error message
+Statuses:
+
+Waiting
+Preparing
+Converting
+Finalizing
+Complete
+Failed
+Cancelled
+
+29. Download System
+For completed files:
+
+✓ conversion complete
+
+output.jpg
+2.1 MB
+
+[ Download ]
+[ Preview ]
+
+For multiple files:
+
+[ Download All ]
+
+Package them locally into a ZIP.
+
+No server-side ZIP generation.
+
+
+30. File Naming
+Automatically generate sensible filenames.
+
+Example:
+
+photo.heic
+→ photo.jpg
+
+document.docx
+→ document.pdf
+
+archive.tar
+→ archive.zip
+
+Allow custom naming templates:
+
+{name}.{extension}
+
+{name}-converted.{extension}
+
+{original-name}-{format}.{extension}
+
+
+31. Conversion Settings
+Create an expandable:
+
+Advanced Settings
+panel.
+
+Settings should be format-specific.
+
+Examples:
+
+Image
+Width
+Height
+Quality
+DPI
+Compression
+Preserve metadata
+Audio
+Bitrate
+Sample rate
+Channels
+Codec
+Video
+Resolution
+FPS
+Codec
+Bitrate
+Quality
+Audio settings
+PDF
+DPI
+Image quality
+Page range
+Archive
+Compression level
+Password where technically supported
+Preserve directory structure
+Never show irrelevant settings.
+
+
+32. Local Privacy
+Display a privacy indicator throughout the application:
+
+🔒 Processed locally
+Add a tooltip:
+
+Your file is processed on this device and isn't uploaded for conversion.
+Do not use analytics that accidentally capture filenames or file contents.
+
+Never send:
+
+File contents
+File previews
+File hashes unless explicitly required and disclosed
+Extracted text
+Personal document contents
+to analytics systems.
+
+
+33. Offline / PWA
+Make the application optionally installable as a PWA.
+
+After required assets are cached, basic conversions should work offline where possible.
+
+Display:
+
+Offline mode
+when disconnected.
+
+Do not pretend every conversion works offline if its engine has not been cached.
+
+
+34. Storage Management
+Do not automatically upload files.
+
+Use browser memory, streams, temporary Blob URLs, and IndexedDB only when appropriate.
+
+Add:
+
+Clear local data
+button.
+
+Allow the user to remove temporary conversion data.
+
+Automatically clean temporary files when appropriate.
+
+
+35. Large File Handling
+Design for large files.
+
+Use:
+
+Streaming APIs where possible
+ArrayBuffer carefully
+Blob APIs
+Web Workers
+Chunked processing
+Lazy loading
+Memory cleanup
+Garbage collection-friendly architecture
+Show a warning when a conversion may require significant RAM.
+
+Example:
+
+This 2.4 GB video may require substantial memory. Continue?
+
+36. Error Handling
+Errors must be human-readable.
+
+Never display:
+
+WASM_ERR_0x000293
+
+Instead:
+
+This file could not be converted. The format may be unsupported or the file may be corrupted.
+Provide:
+
+Retry
+Try another format
+Remove file
+Report issue
+Possible errors:
+
+Unsupported format
+Corrupted file
+Conversion failed
+Insufficient memory
+Browser limitation
+File too large
+Password protected
+DRM protected
+Unsupported codec
+Unsupported archive
+Conversion timed out
+
+37. Browser Compatibility
+Detect browser capabilities.
+
+Support modern:
+
+Chrome
+Edge
+Firefox
+Safari
+If a feature is unavailable:
+
+This conversion requires a browser feature that isn't available in your current browser.
+Recommend a supported browser without blocking the entire application.
+
+
+38. Mobile UX
+The application must work well on:
+
+Android
+iPhone
+Tablets
+Desktop
+On mobile:
+
+Large upload button
+Native file picker
+Touch-friendly controls
+Bottom-sheet format selector
+Progress UI
+Easy download/share
+
+39. Dark Mode
+Support:
+
+Light
+Dark
+System
+Make the interface visually polished.
+
+
+40. Authentication
+Optional account system.
+
+Users can:
+
+Sign up
+Sign in
+Sign out
+Reset password
+Manage profile
+But authentication must NOT be required for basic local conversions.
+
+Users should be able to use the converter as a guest.
+
+
+41. Free vs Paid SaaS
+Create a subscription architecture.
+
+Example:
+
+Free
+Local conversions
+Basic formats
+Limited batch size
+Basic tools
+Pro
+Larger batch conversions
+Advanced settings
+Advanced formats
+Priority feature access
+Conversion history metadata
+Saved preferences
+Remember:
+
+The Pro subscription must NOT require uploading files.
+
+
+42. Usage Limits
+Because processing is client-side, don't artificially pretend server-side usage is happening.
+
+Possible limits:
+
+Maximum simultaneous conversions
+Maximum batch count
+Advanced conversion availability
+Large-file processing
+Premium conversion engines
+Show clear limits.
+
+
+43. User Dashboard
+Create /dashboard.
+
+Sections:
+
+Overview
+Converter
+My Tools
+Favorites
+Recent Activity
+Subscription
+Settings
+Privacy
+
+Recent activity should preferably store only metadata locally unless the user explicitly enables cloud history.
+
+Example:
+
+Recent
+
+photo.heic → photo.jpg
+Today
+
+archive.tar → archive.zip
+Yesterday
+
+report.docx → report.pdf
+Yesterday
+
+
+44. Format Explorer
+Create /formats.
+
+Users can browse all supported formats.
+
+Categories:
+
+Documents
+Images
+Audio
+Video
+Archives
+eBooks
+3D
+Data
+Fonts
+Developer
+Subtitles
+GIS
+Scientific
+Each format page should explain:
+
+JPEG
+
+Extension:
+.jpg / .jpeg
+
+Category:
+Image
+
+Can convert to:
+PNG
+WebP
+AVIF
+TIFF
+PDF
+...
+
+Create SEO-friendly format pages.
+
+Examples:
+
+/convert/jpg-to-png
+/convert/png-to-webp
+/convert/pdf-to-jpg
+/convert/tar-to-zip
+/convert/zip-to-tar
+/convert/heic-to-jpg
+/convert/docx-to-pdf
+
+
+45. Search
+Add global search.
+
+User can type:
+
+tar to zip
+and immediately see:
+
+TAR → ZIP
+Or:
+
+heic
+and see:
+
+HEIC → JPG
+HEIC → PNG
+HEIC → WebP
+
+46. Favorites
+Allow users to favorite common conversions.
+
+Example:
+
+★ PDF → JPG
+★ HEIC → JPG
+★ TAR → ZIP
+★ DOCX → PDF
+
+
+47. Recent Conversions
+Store recent conversion metadata locally.
+
+Allow:
+
+Repeat conversion
+Clear history
+Delete individual history items
+Do not store actual files permanently unless explicitly requested.
+
+
+48. Accessibility
+Follow WCAG principles.
+
+Include:
+
+Keyboard navigation
+Screen reader labels
+Focus states
+Proper contrast
+Accessible drag-and-drop alternative
+Accessible progress indicators
+Reduced-motion support
+ARIA labels
+Semantic HTML
+
+49. Security
+Implement strong client-side security.
+
+Protect against:
+
+Malicious files
+Zip bombs
+Path traversal
+Memory exhaustion
+Decompression bombs
+Infinite archive nesting
+Malformed media
+Dangerous SVG content
+Malicious HTML previews
+XSS through converted files
+Never directly inject converted HTML into the application DOM without sanitization/sandboxing.
+
+Treat SVG and HTML as potentially unsafe.
+
+Use sandboxed previews where appropriate.
+
+
+50. Conversion Engine Architecture
+Create a common interface:
+
+interface ConversionEngine {
+id: string;
+name: string;
+
+canConvert(
+inputFormat: string,
+outputFormat: string
+): boolean;
+
+convert(
+input: File,
+options: ConversionOptions,
+onProgress: ProgressCallback
+): Promise<ConversionResult>;
+}
+
+Create separate engines for:
+
+ImageEngine
+DocumentEngine
+PdfEngine
+ArchiveEngine
+AudioEngine
+VideoEngine
+EbookEngine
+DataEngine
+ThreeDEngine
+FontEngine
+SubtitleEngine
+
+Load engines dynamically.
+
+Do not load video/audio/CAD WASM engines when the user is converting a simple JPG.
+
+
+51. WASM Strategy
+Use WASM where necessary.
+
+Important:
+
+Lazy-load WASM modules
+Cache WASM modules
+Run heavy processing in Web Workers
+Show loading state
+Show download size before loading very large engines where useful
+Release memory after conversion
+Example:
+
+User selects MP4 → MP3
+
+↓
+Load audio/video engine
+
+↓
+Initialize Worker
+
+↓
+Process locally
+
+↓
+Return Blob
+
+↓
+Download
+
+
+52. UI Design
+The design should be premium and minimal.
+
+Style inspiration:
+
+Linear
+Stripe
+Vercel
+Raycast
+Modern developer SaaS
+Avoid:
+
+Excessive gradients
+Clutter
+Huge unnecessary animations
+Confusing menus
+Use:
+
+Clean typography
+Rounded cards
+Subtle shadows
+Clear hierarchy
+Smooth transitions
+Professional icons
+Generous spacing
+
+53. Main Navigation
+Desktop:
+
+Logo
+
+Convert
+Tools
+Formats
+Pricing
+About
+
+[Sign In]
+[Get Started]
+
+Mobile:
+
+Logo ☰
+
+
+54. Tools Page
+Create categories:
+
+PDF Tools
+PDF → JPG
+PDF → PNG
+JPG → PDF
+Merge PDF
+Split PDF
+Compress PDF
+Image Tools
+JPG → PNG
+PNG → JPG
+HEIC → JPG
+WebP → JPG
+Image Compressor
+Resize Image
+Archive Tools
+TAR → ZIP
+ZIP → TAR
+RAR → ZIP
+ZIP → 7Z
+Extract ZIP
+Extract TAR
+Extract 7Z
+Media Tools
+MP4 → MP3
+Video → GIF
+Audio Converter
+Video Converter
+
+55. SEO
+Create strong SEO metadata.
+
+Target searches such as:
+
+online file converter
+free file converter
+PDF converter
+image converter
+JPG converter
+HEIC converter
+TAR to ZIP
+ZIP to TAR
+DOCX to PDF
+PDF to JPG
+MP4 to MP3
+WebP to JPG
+CSV to JSON
+JSON to CSV
+online archive converter
+Create individual landing pages for popular conversion pairs.
+
+
+56. No Fake Features
+Do not create UI buttons for conversions that aren't actually implemented.
+
+Every visible conversion must be connected to a real conversion engine.
+
+If an engine is unavailable:
+
+Coming soon
+
+or don't display it.
+
+
+57. Conversion Capability Labels
+Every format/conversion can have:
+
+✓ Browser
+✓ Private
+✓ Batch
+✓ Preview
+
+Example:
+
+TAR → ZIP
+
+✓ Runs in browser
+✓ Private
+✓ Batch
+✓ No upload
+
+
+58. Progress Experience
+For every conversion:
+
+Preparing...
+Loading conversion engine...
+Reading file...
+Processing...
+Finalizing...
+Complete!
+
+Don't fake progress.
+
+If exact progress isn't available, use an indeterminate progress indicator rather than displaying fake percentages.
+
+
+59. Preview
+Preview converted files where possible.
+
+Images:
+
+Full preview
+Zoom
+Dimensions
+File size
+PDF:
+
+Page preview
+Audio:
+
+Audio player
+Duration
+Waveform if practical
+Video:
+
+Video player
+Resolution
+Duration
+Text/data:
+
+Text/data preview
+3D:
+
+Interactive model viewer
+
+60. Before / After
+For image conversions show:
+
+BEFORE
+photo.heic
+2.8 MB
+4032 × 3024
+
+↓
+
+AFTER
+photo.jpg
+1.2 MB
+4032 × 3024
+
+Show compression percentage when meaningful.
+
+
+61. Privacy Page
+Create a detailed privacy page explaining:
+
+Files are processed locally
+Files are not uploaded for conversion
+Temporary browser data may exist
+Users can clear local data
+Analytics do not receive file contents
+Third-party services should not receive file contents
+Limitations of browser security
+Be transparent.
+
+
+62. Terms / Legal
+Create:
+
+Terms of Service
+Privacy Policy
+Cookie Policy if applicable
+Refund Policy
+Acceptable Use Policy
+Do not claim absolute security or privacy guarantees.
+
+
+63. Pricing Page
+Create:
+
+Free
+$0
+
+Pro
+$X/month
+
+Business
+$X/month
+
+The exact pricing can be configurable.
+
+Highlight:
+
+Browser processing
+Batch processing
+Advanced formats
+Large files
+Premium tools
+
+64. Settings
+Include:
+
+Appearance
+Theme
+Language
+Conversion
+Default output format
+Auto-download
+Preserve metadata
+Compression defaults
+Privacy
+Clear local history
+Clear cached engines
+Clear local data
+Account
+Profile
+Subscription
+Logout
+
+65. Internationalization
+Prepare the application for multiple languages.
+
+Do not hard-code UI text.
+
+Use translation keys.
+
+Start with:
+
+English
+Structure the code so additional languages can be added later.
+
+
+66. Notifications
+Use non-intrusive toast notifications.
+
+Examples:
+
+Conversion complete
+4 files converted successfully
+Conversion failed
+File removed
+Local data cleared
+
+67. Empty States
+Create polished empty states.
+
+Example:
+
+No files yet
+
+Drop a file here to start converting.
+
+History:
+
+No recent conversions
+
+Your recent local conversions will appear here.
+
+
+68. Loading States
+Use skeleton loaders for:
+
+Format pages
+Dashboard
+Tool pages
+For conversion engines:
+
+Preparing converter...
+
+
+69. Responsive Layout
+Desktop:
+
+Two-column conversion layout where useful
+Tablet:
+
+Responsive cards
+Mobile:
+
+Single-column
+Bottom sheets
+Large buttons
+Sticky conversion action
+
+70. Performance
+Performance is extremely important.
+
+Implement:
+
+Code splitting
+Dynamic imports
+Lazy-loaded conversion engines
+WASM lazy loading
+Web Workers
+Image virtualization
+Efficient memory management
+Blob URL cleanup
+Avoid unnecessary React renders
+The homepage should NOT load every conversion engine.
+
+
+71. Analytics
+Analytics should measure product usage without collecting file contents.
+
+Allowed events:
+
+conversion_started
+conversion_completed
+conversion_failed
+format_selected
+tool_opened
+pricing_viewed
+signup_completed
+
+Do NOT send:
+
+file contents
+document text
+image data
+audio data
+video data
+
+Consider anonymizing filenames if analytics needs them at all.
+
+Prefer not to send filenames.
+
+
+72. Error Monitoring
+Track application errors without uploading user files.
+
+Error reports must be scrubbed of:
+
+File contents
+File paths
+Personal information
+Filenames where possible
+
+73. File Size UX
+Show:
+
+12.4 MB
+
+Use human-readable formatting.
+
+For very large files:
+
+Large file detected
+
+This conversion may use significant device memory.
+
+Allow the user to cancel.
+
+
+74. Cancellation
+Every long conversion should support cancellation where technically possible.
+
+Example:
+
+Converting...
+
+████████░░ 82%
+
+[ Cancel ]
+
+After cancellation:
+
+Conversion cancelled. Temporary data was cleared.
+
+75. Retry
+If a conversion fails:
+
+Conversion failed
+
+[ Retry ]
+[ Try Another Format ]
+[ Remove ]
+
+
+76. Accessibility of File Input
+Always provide a standard file picker.
+
+Do not make drag-and-drop the only method.
+
+Use:
+
+<input type="file">
+
+with proper accessibility labeling.
+
+
+77. Testing
+Create tests for:
+
+Format detection
+Conversion registry
+Compatibility matrix
+Filename generation
+MIME detection
+Archive extraction
+Archive conversion
+Error handling
+Cancellation
+Batch processing
+Large files
+Worker communication
+WASM loading
+Memory cleanup
+Test across:
+
+Chrome
+Firefox
+Safari
+Edge
+Mobile Safari
+Android Chrome
+
+78. Project Structure
+Use a clean architecture similar to:
+
+src/
+├── app/
+│ ├── page
+│ ├── convert/
+│ ├── tools/
+│ ├── formats/
+│ ├── pricing/
+│ ├── dashboard/
+│ └── settings/
+│
+├── components/
+│ ├── converter/
+│ ├── uploader/
+│ ├── format-selector/
+│ ├── progress/
+│ ├── preview/
+│ ├── archive/
+│ └── ui/
+│
+├── conversion/
+│ ├── registry/
+│ ├── engines/
+│ │ ├── image/
+│ │ ├── pdf/
+│ │ ├── document/
+│ │ ├── audio/
+│ │ ├── video/
+│ │ ├── archive/
+│ │ ├── ebook/
+│ │ ├── data/
+│ │ └── 3d/
+│ ├── workers/
+│ └── utils/
+│
+├── lib/
+├── hooks/
+├── types/
+├── config/
+└── styles/
+
+
+79. Important Product Rule
+Never advertise:
+
+“Every format converts to every other format.”
+Instead advertise:
+
+Convert hundreds of file formats with intelligent compatibility matching.
+The application should intelligently determine which conversions are technically meaningful and available.
+
+
+80. Final UX Flow
+The ideal user experience should be:
+
+User visits website
+↓
+Drops file
+↓
+Application detects format
+↓
+Shows compatible formats
+↓
+User selects output
+↓
+Optional advanced settings
+↓
+User clicks Convert
+↓
+Conversion engine loads locally
+↓
+Web Worker processes file
+↓
+Progress displayed
+↓
+Conversion completes
+↓
+Preview shown
+↓
+Download button
+↓
+Temporary browser resources cleaned
+
+
+81. Most Important Requirements
+Prioritize these above everything else:
+
+No file upload for conversion
+Client-side processing
+Real conversions, not mocked functionality
+Web Workers for heavy processing
+WASM engines where necessary
+Automatic file detection
+Intelligent output compatibility
+Batch conversion
+ZIP/TAR/archive support
+TAR → ZIP must work
+ZIP → TAR must work
+Archive extraction
+Progress tracking
+Cancellation
+Retry
+Preview
+Download all
+Responsive mobile UX
+Dark mode
+Accessibility
+Privacy-first design
+Strong security around untrusted files
+Lazy loading of heavy engines
+Large-file handling
+Production-quality error handling
+SEO-friendly conversion pages
+SaaS authentication and billing architecture without requiring file uploads
+No fake conversion buttons
+No fake progress
+Clean modular conversion-engine architecture
+
+
+
+Design : 
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+@layer base {
+html, body { margin: 0; padding: 0; }
+body { overscroll-behavior: none; }
+main > :first-child { margin-top: 0 !important; }
+main > :last-child { margin-bottom: 0 !important; }
+}
+::-webkit-scrollbar { display: none; }
+</style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+tailwind.config = {
+darkMode: "class",
+theme: {
+extend: {
+colors: {
+"canvas": "#F4F3F1",
+"background": "#F4F3F1",
+"surface": "#FFFFFF",
+"surface-container": "#FFFFFF",
+"surface-container-low": "#F8F7F5",
+"surface-container-high": "#F0EFEB",
+"surface-container-highest": "#E7E5E0",
+"surface-container-lowest": "#FFFFFF",
+"primary": "#A9473C",
+"on-primary": "#FFFFFF",
+"accent-light": "#E8D3CF",
+"border-rule": "#DCDAD6",
+"outline-variant": "#DCDAD6",
+"outline": "#6F6F6B",
+"on-surface": "#151515",
+"on-surface-variant": "#6F6F6B",
+"secondary": "#8F3A30",
+"error": "#BA1A1A",
+"error-container": "#FFDAD6",
+"on-error-container": "#93000A"
+},
+borderRadius: {
+"DEFAULT": "0.125rem",
+"lg": "0.25rem",
+"xl": "0.5rem",
+"full": "0.75rem"
+},
+spacing: {
+"space-lg": "1.5rem",
+"margin": "1rem",
+"gutter": "1rem",
+"gutter-lg": "1.5rem",
+"space-xl": "2.5rem",
+"space-xs": "0.25rem",
+"space-md": "1rem",
+"margin-md": "2rem",
+"space-sm": "0.5rem",
+"margin-lg": "3rem"
+},
+fontFamily: {
+"body-lg": ["Inter", "sans-serif"],
+"headline-lg-mobile": ["Inter", "sans-serif"],
+"display": ["Inter", "sans-serif"],
+"mono-code": ["JetBrains Mono", "monospace"],
+"headline-lg": ["Inter", "sans-serif"],
+"body-md": ["Inter", "sans-serif"],
+"mono-md": ["JetBrains Mono", "monospace"],
+"mono-sm": ["JetBrains Mono", "monospace"],
+"display-mobile": ["Inter", "sans-serif"],
+"headline-sm": ["Inter", "sans-serif"],
+"mono-lg": ["JetBrains Mono", "monospace"],
+"headline-md": ["Inter", "sans-serif"],
+"body-sm": ["Inter", "sans-serif"]
+},
+fontSize: {
+"body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "400" }],
+"headline-lg-mobile": ["26px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" }],
+"display": ["46px", { lineHeight: "52px", letterSpacing: "-0.03em", fontWeight: "700" }],
+"mono-code": ["12px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+"headline-lg": ["32px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "600" }],
+"body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }],
+"mono-md": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "500" }],
+"mono-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }],
+"display-mobile": ["34px", { lineHeight: "40px", letterSpacing: "-0.025em", fontWeight: "700" }],
+"headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600" }],
+"mono-lg": ["15px", { lineHeight: "20px", letterSpacing: "-0.01em", fontWeight: "500" }],
+"headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.015em", fontWeight: "600" }],
+"body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0em", fontWeight: "400" }]
+}
+}
+}
+}
+</script>
+</head>
+<body class="bg-canvas font-body-md text-body-md text-on-surface antialiased selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation Header -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface/95 backdrop-blur-md border-b border-border-rule">
+<div class="h-16 w-full px-gutter-lg flex items-center justify-between gap-gutter">
+<div class="flex items-center gap-space-lg">
+<a class="flex items-baseline gap-space-xs group" data-path="convert" href="#">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface group-hover:text-primary transition-colors">RELAY</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant px-space-xs py-0.5 rounded bg-surface-container-high border border-border-rule">v2.4-client</span>
+</a>
+<div class="hidden xl:flex items-center gap-space-xs px-space-sm py-1 rounded bg-accent-light/50 border border-primary/30">
+<span class="material-symbols-outlined text-[14px] text-primary">lock</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono-sm text-mono-sm font-semibold tracking-wider text-primary uppercase">100% IN-BROWSER / ZERO UPLOAD</span>
+</div>
+</div>
+<nav class="hidden lg:flex items-center gap-space-xs p-0.5 rounded-lg bg-surface-container-low border border-border-rule">
+<a aria-current="page" class="px-space-md py-1.5 rounded bg-surface text-primary border border-border-rule shadow-sm font-medium transition-all" data-path="convert" href="#">Convert</a>
+<a class="px-space-md py-1.5 rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="tools-and-archive" href="#">Tools &amp; Archive</a>
+<a class="px-space-md py-1.5 rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="format-matrix" href="#">Format Matrix</a>
+<a class="px-space-md py-1.5 rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="architecture-and-privacy" href="#">Architecture &amp; Privacy</a>
+<a class="px-space-md py-1.5 rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="pricing" href="#">Pricing</a>
+</nav>
+<div class="flex items-center gap-space-sm">
+<div class="hidden md:flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface border border-border-rule shadow-sm">
+<span class="material-symbols-outlined text-[15px] text-on-surface-variant">memory</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">Local RAM:</span>
+<span class="font-mono-sm text-mono-sm text-primary font-semibold">0.0 MB</span>
+<button class="ml-space-xs text-on-surface-variant hover:text-on-surface transition-colors flex items-center" title="Purge Allocated RAM" type="button">
+<span class="material-symbols-outlined text-[14px]">delete_sweep</span>
+</button>
+</div>
+<div class="hidden sm:flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface border border-border-rule shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">Offline Ready (PWA)</span>
+</div>
+<a class="hidden sm:flex items-center gap-space-xs px-space-md py-1.5 rounded bg-surface border border-border-rule hover:border-primary hover:text-primary transition-all shadow-sm" data-path="pricing" href="#">
+<span class="material-symbols-outlined text-[16px] text-primary">bolt</span>
+<span class="font-mono-sm text-mono-sm font-semibold uppercase tracking-wider text-on-surface">Pro Account</span>
+</a>
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<main class="w-full pt-16 bg-canvas min-h-screen">
+<div class="flex flex-col w-full">
+<!-- Micro Telemetry Ticker Bar -->
+<div class="w-full bg-surface border-b border-border-rule px-gutter-lg py-2 flex flex-wrap items-center justify-between text-on-surface-variant gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+<span class="font-mono-sm text-mono-sm text-primary font-semibold">RUNTIME: WASM-ISOLATED SANDBOX</span>
+</div>
+<span class="text-border-rule">/</span>
+<div class="hidden sm:flex items-center gap-space-xs font-mono-sm text-mono-sm">
+<span class="text-on-surface-variant">WORKERS:</span>
+<span class="text-on-surface font-semibold" id="worker-stat">4/8 CORES ACTIVE</span>
+</div>
+<span class="hidden sm:inline text-border-rule">/</span>
+<div class="hidden md:flex items-center gap-space-xs font-mono-sm text-mono-sm">
+<span class="text-on-surface-variant">ALLOCATED HEAP:</span>
+<span class="text-on-surface font-semibold">142.4 MB</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs bg-accent-light/50 border border-primary/20 px-space-xs py-0.5 rounded text-primary">
+<span class="material-symbols-outlined text-[13px]">cloud_off</span>
+<span class="font-mono-sm text-mono-sm font-semibold tracking-wider">0 BYTES UPLOADED</span>
+</div>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant hidden lg:block">
+SESSION_HASH: <span class="text-on-surface font-mono-code text-mono-code font-semibold">8f19..b3e0</span>
+</div>
+</div>
+</div>
+<!-- Primary Workspace Content -->
+<div class="w-full max-w-7xl mx-auto px-gutter md:px-gutter-lg py-space-xl flex flex-col gap-space-xl">
+<!-- Hero Header Stage -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs max-w-3xl">
+<div class="inline-flex items-center gap-space-xs text-primary font-mono-sm text-mono-sm tracking-wider uppercase font-semibold">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span>Zero-Latency Local Computation</span>
+</div>
+<h1 class="font-display text-display-mobile md:text-display text-on-surface font-bold tracking-tight">
+Convert Files. Privately. <span class="text-primary">Right in Your Browser.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mt-1">
+Client-side WebAssembly, isolated Web Workers, and native streaming APIs.
+Your sensitive documents, keys, archives, and media never touch a remote server.
+</p>
+</div>
+<!-- Quick Trust Indicators -->
+<div class="flex flex-row md:flex-col items-start md:items-end gap-space-sm">
+<div class="bg-surface border border-border-rule px-space-md py-space-xs rounded-lg shadow-sm flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-primary">shield_locked</span>
+<div class="flex flex-col">
+<span class="font-mono-sm text-mono-sm font-bold text-on-surface">AIR-GAPPED COMPATIBLE</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">PWA Cache v2.4 Installed</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Dropzone Area -->
+<div class="relative group bg-surface hover:bg-surface-container-low transition-all duration-300 rounded-xl border-2 border-dashed border-border-rule hover:border-primary p-space-lg md:p-space-xl flex flex-col items-center justify-center text-center cursor-pointer shadow-sm" id="dropzone">
+<!-- Crosshair Corner Decors -->
+<div class="absolute top-3 left-3 font-mono-code text-mono-code text-on-surface-variant opacity-60 select-none">+0.0</div>
+<div class="absolute top-3 right-3 font-mono-code text-mono-code text-on-surface-variant opacity-60 select-none">+1.0</div>
+<div class="absolute bottom-3 left-3 font-mono-code text-mono-code text-on-surface-variant opacity-60 select-none">-0.0</div>
+<div class="absolute bottom-3 right-3 font-mono-code text-mono-code text-on-surface-variant opacity-60 select-none">-1.0</div>
+<!-- Inner Drop Container -->
+<div class="relative z-10 flex flex-col items-center gap-space-md max-w-2xl py-space-sm">
+<!-- Floating State Badge -->
+<div class="flex items-center gap-space-xs bg-surface-container-high border border-border-rule px-space-md py-1 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono-sm text-mono-sm font-semibold text-primary">CLIENT-SIDE SANDBOX: VERIFIED ZERO NETWORK TRANSMISSION</span>
+</div>
+<!-- Main Icon Indicator -->
+<div class="w-16 h-16 rounded-xl bg-accent-light/50 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 shadow-sm">
+<span class="material-symbols-outlined text-[32px]">file_upload</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="font-headline-sm text-headline-sm font-bold text-on-surface">
+Drop files or folders here to transform
+</div>
+<div class="font-body-md text-body-md text-on-surface-variant flex items-center justify-center gap-space-xs">
+<span>Direct stream memory intake</span>
+<span class="text-border-rule">•</span>
+<span class="font-mono-sm text-mono-sm text-on-surface font-semibold px-1.5 py-0.5 rounded bg-surface-container-high border border-border-rule">Cmd+V</span>
+<span>from clipboard</span>
+</div>
+</div>
+<!-- Action Callout Buttons -->
+<div class="flex flex-wrap items-center justify-center gap-space-sm mt-space-xs">
+<label class="bg-primary hover:bg-secondary text-on-primary transition-colors font-body-md text-body-md font-semibold px-space-lg py-2 rounded flex items-center gap-space-xs cursor-pointer shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Choose Files</span>
+<input class="hidden" id="file-input" multiple="" type="file"/>
+</label>
+<label class="bg-surface hover:bg-surface-container-high text-on-surface border border-border-rule transition-colors font-body-md text-body-md font-medium px-space-md py-2 rounded flex items-center gap-space-xs cursor-pointer shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">folder_open</span>
+<span>Select Folder</span>
+<input class="hidden" directory="" id="folder-input" multiple="" type="file" webkitdirectory=""/>
+</label>
+</div>
+<!-- Supported Formats Categorized Pills -->
+<div class="pt-space-md flex flex-wrap items-center justify-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant font-semibold mr-space-xs">SUPPORTED PIPELINES:</span>
+<span class="font-mono-sm text-mono-sm px-2 py-0.5 rounded bg-surface border border-border-rule text-on-surface">Documents (.PDF, .DOCX, .TXT, .MD, .EPUB)</span>
+<span class="font-mono-sm text-mono-sm px-2 py-0.5 rounded bg-surface border border-border-rule text-on-surface">Images (.HEIC, .AVIF, .WEBP, .RAW, .PNG)</span>
+<span class="font-mono-sm text-mono-sm px-2 py-0.5 rounded bg-surface border border-border-rule text-on-surface">Archives (.TAR, .ZIP, .GZ, .7Z)</span>
+<span class="font-mono-sm text-mono-sm px-2 py-0.5 rounded bg-surface border border-border-rule text-on-surface">Media (.MOV, .WEBM, .MP4, .WAV, .FLAC)</span>
+<span class="font-mono-sm text-mono-sm px-2 py-0.5 rounded bg-accent-light/50 border border-primary/30 text-primary font-bold">+48 MORE</span>
+</div>
+</div>
+</div>
+<!-- Active Batch Conversion Queue Section -->
+<div class="flex flex-col gap-space-md">
+<!-- Queue Subheader & Quick Status -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-space-xs">
+<span>Active Batch Queue</span>
+<span class="text-mono-sm font-mono-sm bg-accent-light/60 border border-primary/20 text-primary px-2 py-0.5 rounded font-bold">4 ITEMS</span>
+</div>
+<span class="text-border-rule hidden md:inline">|</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant hidden md:inline">
+316.0 MB Buffered in RAM
+</span>
+</div>
+<!-- Quick Switch Preset Filtering -->
+<div class="flex items-center gap-space-xs bg-surface border border-border-rule p-1 rounded-lg shadow-sm">
+<button class="px-space-sm py-1 font-mono-sm text-mono-sm rounded bg-accent-light text-primary font-bold border border-primary/20">ALL [4]</button>
+<button class="px-space-sm py-1 font-mono-sm text-mono-sm rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">PROCESSING [1]</button>
+<button class="px-space-sm py-1 font-mono-sm text-mono-sm rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">COMPLETED [1]</button>
+<button class="px-space-sm py-1 font-mono-sm text-mono-sm rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">PENDING [2]</button>
+</div>
+</div>
+<!-- Batch Processing Cards List -->
+<div class="flex flex-col gap-space-sm">
+<!-- FILE 1: COMPLETED ITEM (HEIC -> JPG) -->
+<div class="bg-surface border border-border-rule rounded-xl p-space-md md:p-space-lg flex flex-col gap-space-md shadow-sm transition-all">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<!-- Left File Info -->
+<div class="flex items-start gap-space-md min-w-0 flex-1">
+<div class="w-10 h-10 rounded-lg bg-accent-light/50 border border-primary/20 flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[24px]">image</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-mono-lg text-mono-lg font-bold text-on-surface truncate">raw_camera_shoot_049.heic</span>
+<span class="bg-accent-light/40 border border-primary/20 text-primary font-mono-sm text-mono-sm px-1.5 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">fingerprint</span>
+HEIC (Magic: 00 00 00 18 66 74 79 70)
+</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-mono-sm text-mono-sm mt-1">
+<span>INPUT: 14.2 MB</span>
+<span>•</span>
+<span>4032 x 3024 px</span>
+<span>•</span>
+<span class="text-primary font-semibold">100% Client-Side Decoded</span>
+</div>
+</div>
+</div>
+<!-- Center Config / Target Selector -->
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant font-medium">OUTPUT:</span>
+<div class="relative inline-block">
+<select class="bg-surface text-on-surface border border-border-rule font-mono-md text-mono-md font-semibold px-space-md py-1.5 rounded pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm">
+<option selected="">JPG (Quality: 92%)</option>
+<option>PNG (Lossless)</option>
+<option>WebP (Auto)</option>
+<option>AVIF (High Comp)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 text-on-surface-variant pointer-events-none text-[16px]">expand_more</span>
+</div>
+<!-- Before / After Savings Pill -->
+<div class="bg-accent-light/50 border border-primary/30 text-primary font-mono-sm text-mono-sm px-space-sm py-1.5 rounded flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+<span>2.1 MB (-85.2%)</span>
+</div>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-space-xs shrink-0">
+<button class="bg-surface hover:bg-surface-container-high border border-border-rule text-on-surface px-space-md py-1.5 rounded font-mono-sm text-mono-sm font-semibold flex items-center gap-1 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">visibility</span>
+<span>Inspect</span>
+</button>
+<button class="bg-primary hover:bg-secondary text-on-primary px-space-md py-1.5 rounded font-mono-sm text-mono-sm font-bold flex items-center gap-1 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[16px]">download</span>
+<span>Save JPG</span>
+</button>
+</div>
+</div>
+<!-- Progress Ribbon State (Completed) -->
+<div class="w-full flex items-center gap-space-md pt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-full"></div>
+</div>
+<div class="shrink-0 flex items-center gap-space-xs font-mono-sm text-mono-sm text-primary font-bold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>DONE (0.42s)</span>
+</div>
+</div>
+</div>
+<!-- FILE 2: IN-PROGRESS ACTIVE WASM WORKER (TAR -> ZIP) -->
+<div class="bg-surface border border-border-rule rounded-xl p-space-md md:p-space-lg flex flex-col gap-space-md shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<!-- Left Info -->
+<div class="flex items-start gap-space-md min-w-0 flex-1">
+<div class="w-10 h-10 rounded-lg bg-accent-light/50 border border-primary/20 flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[24px]">folder_zip</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-mono-lg text-mono-lg font-bold text-on-surface truncate">linux_firmware_dist.tar</span>
+<span class="bg-surface-container-high border border-border-rule text-on-surface-variant font-mono-sm text-mono-sm px-1.5 py-0.5 rounded font-medium">
+POSIX Tarball (USTAR format)
+</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-mono-sm text-mono-sm mt-1">
+<span>INPUT: 84.6 MB</span>
+<span>•</span>
+<span>412 Archived Entries</span>
+<span>•</span>
+<span class="text-primary font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+WASM Worker Thread #3
+</span>
+</div>
+</div>
+</div>
+<!-- Target Format -->
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant font-medium">TARGET:</span>
+<div class="relative inline-block">
+<select class="bg-surface text-on-surface border border-border-rule font-mono-md text-mono-md font-semibold px-space-md py-1.5 rounded pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm">
+<option selected="">ZIP (Deflate lv6)</option>
+<option>7Z (LZMA2 Maximum)</option>
+<option>TAR.GZ (Pigz Stream)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 text-on-surface-variant pointer-events-none text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0">
+<button class="bg-surface hover:bg-error-container hover:text-on-error-container text-on-surface-variant border border-border-rule px-space-md py-1.5 rounded font-mono-sm text-mono-sm font-semibold transition-colors flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span>Abort</span>
+</button>
+</div>
+</div>
+<!-- Progress Indicator & Realtime Throughput -->
+<div class="flex flex-col gap-1.5 pt-space-xs">
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full transition-all duration-300" style="width: 68%;"></div>
+</div>
+<div class="flex items-center justify-between font-mono-sm text-mono-sm text-on-surface-variant">
+<div class="flex items-center gap-space-sm">
+<span class="text-primary font-bold">68% COMPLETE</span>
+<span class="text-on-surface-variant">SPEED: 38.4 MB/s</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span>REMAINING: ~0.8 SECONDS</span>
+<span class="text-on-surface-variant">(BUFFER: 57.5 / 84.6 MB)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- FILE 3: PENDING DOCUMENT CONVERSION (PDF -> DOCX) -->
+<div class="bg-surface border border-border-rule rounded-xl p-space-md md:p-space-lg flex flex-col gap-space-md shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<!-- Left Info -->
+<div class="flex items-start gap-space-md min-w-0 flex-1">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high border border-border-rule flex items-center justify-center text-on-surface shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[24px]">picture_as_pdf</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-mono-lg text-mono-lg font-bold text-on-surface truncate">annual_earnings_analysis.pdf</span>
+<span class="bg-surface-container-high border border-border-rule text-on-surface-variant font-mono-sm text-mono-sm px-1.5 py-0.5 rounded font-medium">
+PDF 1.7 (Linearized, Form Fields)
+</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-mono-sm text-mono-sm mt-1">
+<span>INPUT: 6.8 MB</span>
+<span>•</span>
+<span>42 Pages</span>
+<span>•</span>
+<span class="text-on-surface-variant">OCR Engine Ready</span>
+</div>
+</div>
+</div>
+<!-- Target Format -->
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant font-medium">TARGET:</span>
+<div class="relative inline-block">
+<select class="bg-surface text-on-surface border border-border-rule font-mono-md text-mono-md font-semibold px-space-md py-1.5 rounded pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm">
+<option selected="">DOCX (Text &amp; Tables)</option>
+<option>EPUB (Reflowable)</option>
+<option>Markdown (.MD)</option>
+<option>Plain Text (.TXT)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 text-on-surface-variant pointer-events-none text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0">
+<button class="bg-primary hover:bg-secondary text-on-primary px-space-md py-1.5 rounded font-mono-sm text-mono-sm font-bold flex items-center gap-1 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>Process Item</span>
+</button>
+</div>
+</div>
+<!-- Pending Status Bar -->
+<div class="flex items-center justify-between font-mono-sm text-mono-sm text-on-surface-variant pt-space-xs border-t border-border-rule/60">
+<div class="flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span>
+<span>STANDBY // DOM Vector parser initialized</span>
+</div>
+<span>EST. CONSUMPTION: 28 MB RAM</span>
+</div>
+</div>
+<!-- FILE 4: LARGE MEDIA ITEM WITH WARNING & ADVANCED SETTINGS (MOV -> WebM) -->
+<div class="bg-surface border border-border-rule rounded-xl p-space-md md:p-space-lg flex flex-col gap-space-md shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<!-- Left Info -->
+<div class="flex items-start gap-space-md min-w-0 flex-1">
+<div class="w-10 h-10 rounded-lg bg-accent-light/50 border border-primary/20 flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[24px]">movie</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-mono-lg text-mono-lg font-bold text-on-surface truncate">production_screencast.mov</span>
+<span class="bg-surface-container-high border border-border-rule text-on-surface-variant font-mono-sm text-mono-sm px-1.5 py-0.5 rounded font-medium">
+QuickTime / ProRes 422
+</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-mono-sm text-mono-sm mt-1 flex-wrap">
+<span>INPUT: 210.4 MB</span>
+<span>•</span>
+<span>1920x1080 @ 60fps</span>
+<span>•</span>
+<!-- Streaming warning badge -->
+<span class="bg-accent-light/60 border border-primary/30 text-primary px-1.5 py-0.5 rounded flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[13px]">warning</span>
+File &gt;200MB: Stream Chunking Activated
+</span>
+</div>
+</div>
+</div>
+<!-- Target Format -->
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant font-medium">TARGET:</span>
+<div class="relative inline-block">
+<select class="bg-surface text-on-surface border border-border-rule font-mono-md text-mono-md font-semibold px-space-md py-1.5 rounded pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm">
+<option selected="">WebM (VP9 + Opus)</option>
+<option>MP4 (H.264 Baseline)</option>
+<option>Animated GIF</option>
+<option>Audio Extract (WAV 48kHz)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 text-on-surface-variant pointer-events-none text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0">
+<button class="bg-surface hover:bg-surface-container-high border border-border-rule text-on-surface px-space-md py-1.5 rounded font-mono-sm text-mono-sm font-semibold flex items-center gap-1 transition-colors shadow-sm" onclick="document.getElementById('mov-advanced').classList.toggle('hidden')">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">tune</span>
+<span>Config</span>
+</button>
+<button class="bg-primary hover:bg-secondary text-on-primary px-space-md py-1.5 rounded font-mono-sm text-mono-sm font-bold flex items-center gap-1 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>Queue</span>
+</button>
+</div>
+</div>
+<!-- Advanced Video Parameter Accordion Box (Toggled) -->
+<div class="bg-surface-container-low border border-border-rule p-space-md rounded-lg grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-space-md font-mono-sm text-mono-sm" id="mov-advanced">
+<div class="flex flex-col gap-1">
+<label class="text-on-surface-variant font-semibold">TARGET BITRATE</label>
+<select class="bg-surface border border-border-rule text-on-surface px-2 py-1 rounded focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option>Auto (CRF 28 - Balanced)</option>
+<option>High Quality (CRF 20)</option>
+<option>Web Stream (1200 kbps)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="text-on-surface-variant font-semibold">FRAME RATE</label>
+<select class="bg-surface border border-border-rule text-on-surface px-2 py-1 rounded focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option>Preserve (60 FPS)</option>
+<option>Cap at 30 FPS</option>
+<option>Cinematic 24 FPS</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="text-on-surface-variant font-semibold">TEMPORAL TRIM</label>
+<div class="flex items-center gap-1">
+<input class="w-16 bg-surface border border-border-rule px-1.5 py-1 text-center rounded text-on-surface font-mono-sm text-mono-sm focus:outline-none focus:ring-1 focus:ring-primary" type="text" value="00:00"/>
+<span class="text-on-surface-variant">to</span>
+<input class="w-16 bg-surface border border-border-rule px-1.5 py-1 text-center rounded text-on-surface font-mono-sm text-mono-sm focus:outline-none focus:ring-1 focus:ring-primary" type="text" value="End"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="text-on-surface-variant font-semibold">AUDIO TRACK</label>
+<label class="flex items-center gap-2 mt-1 cursor-pointer">
+<input class="accent-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+<span class="text-on-surface">Mute Audio Track</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Batch Management & Global Action Toolbar -->
+<div class="bg-surface border border-border-rule p-space-md rounded-xl flex flex-col md:flex-row items-center justify-between gap-space-md shadow-lg sticky bottom-4 z-40">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded-lg bg-accent-light/60 border border-primary/20 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">layers</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-bold text-on-surface">
+4 Files Buffered (316.0 MB Session Total)
+</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">
+1 Converted • 1 In Execution • 2 In Standby
+</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-space-xs">
+<button class="bg-surface hover:bg-surface-container-high border border-border-rule text-on-surface px-space-md py-2 rounded font-mono-sm text-mono-sm font-semibold transition-colors flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">clear_all</span>
+<span>Clear Complete</span>
+</button>
+<button class="bg-surface hover:bg-surface-container-high border border-border-rule text-on-surface px-space-md py-2 rounded font-mono-sm text-mono-sm font-semibold transition-colors flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">pause</span>
+<span>Pause All</span>
+</button>
+<button class="bg-accent-light/40 hover:bg-accent-light border border-primary/30 text-primary font-bold px-space-md py-2 rounded font-mono-sm text-mono-sm transition-colors flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">archive</span>
+<span>Zip &amp; Save All</span>
+</button>
+<button class="bg-primary hover:bg-secondary text-on-primary px-space-lg py-2 rounded font-body-md text-body-md font-bold transition-all shadow-md flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+<span>Execute All</span>
+</button>
+</div>
+</div>
+<!-- Diagnostic Bento Grid: Hardware Telemetry & Architecture -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md pt-space-md">
+<!-- Panel 1: Worker Core Threading Status -->
+<div class="bg-surface border border-border-rule p-space-lg rounded-xl flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant uppercase font-semibold">Web Worker Thread Allocation</span>
+<span class="material-symbols-outlined text-[18px] text-primary">memory</span>
+</div>
+<div class="font-display-mobile text-display-mobile font-bold text-on-surface">4 / 8</div>
+<div class="grid grid-cols-4 gap-1.5 py-1">
+<div class="h-2 rounded bg-primary" title="Worker 0: HEIC Pipeline (Idle)"></div>
+<div class="h-2 rounded bg-primary" title="Worker 1: TAR Archive (Active)"></div>
+<div class="h-2 rounded bg-primary animate-pulse" title="Worker 2: Audio Decoder (Standby)"></div>
+<div class="h-2 rounded bg-primary animate-pulse" title="Worker 3: Video Chunk Stream (Active)"></div>
+<div class="h-2 rounded bg-surface-container-highest" title="Worker 4: Available"></div>
+<div class="h-2 rounded bg-surface-container-highest" title="Worker 5: Available"></div>
+<div class="h-2 rounded bg-surface-container-highest" title="Worker 6: Available"></div>
+<div class="h-2 rounded bg-surface-container-highest" title="Worker 7: Available"></div>
+</div>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">SharedArrayBuffer concurrency enabled without data transfer overhead.</span>
+</div>
+<!-- Panel 2: Memory Footprint -->
+<div class="bg-surface border border-border-rule p-space-lg rounded-xl flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant uppercase font-semibold">Local V8 Heap &amp; WASM Heap</span>
+<span class="material-symbols-outlined text-[18px] text-primary">database</span>
+</div>
+<div class="font-display-mobile text-display-mobile font-bold text-on-surface">142.4 <span class="text-headline-md font-mono-sm text-on-surface-variant">MB</span></div>
+<div class="w-full bg-surface-container-highest h-2 rounded overflow-hidden">
+<div class="bg-primary h-full" style="width: 28%;"></div>
+</div>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">Max Browser Quota: ~2,048 MB. Memory automatically reclaimed upon download.</span>
+</div>
+<!-- Panel 3: Privacy Verification Ledger -->
+<div class="bg-surface border border-border-rule p-space-lg rounded-xl flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant uppercase font-semibold">Network Exfiltration Audit</span>
+<span class="material-symbols-outlined text-[18px] text-primary">verified</span>
+</div>
+<div class="font-display-mobile text-display-mobile font-bold text-primary">0 <span class="text-headline-md font-mono-sm text-primary">Bytes Out</span></div>
+<div class="flex items-center gap-space-xs font-mono-sm text-mono-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>Content Security Policy: connect-src 'none'</span>
+</div>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">Inspect the devtools network panel at any time to verify complete isolation.</span>
+</div>
+</div>
+<!-- Recent Session History Mini Tray -->
+<div class="flex flex-col gap-space-sm pt-space-sm mb-space-xl">
+<div class="flex items-center justify-between">
+<span class="font-mono-sm text-mono-sm uppercase text-on-surface-variant font-semibold tracking-wider">
+Ephemeral Session Log (RAM-Only • Clears on tab close)
+</span>
+<button class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-on-surface transition-colors font-medium">
+Clear History
+</button>
+</div>
+<div class="bg-surface border border-border-rule rounded-xl p-space-md flex flex-col divide-y divide-border-rule shadow-sm">
+<div class="flex items-center justify-between py-2 text-on-surface-variant font-mono-sm text-mono-sm">
+<div class="flex items-center gap-space-sm">
+<span class="text-primary font-bold">SAVED</span>
+<span class="text-on-surface font-semibold">financial_contract_signed.pdf → PDF/A-2b</span>
+<span class="text-on-surface-variant hidden sm:inline">(1.2 MB • SHA-256: 4e9a..c321)</span>
+</div>
+<span class="text-on-surface-variant">2 mins ago</span>
+</div>
+<div class="flex items-center justify-between py-2 text-on-surface-variant font-mono-sm text-mono-sm">
+<div class="flex items-center gap-space-sm">
+<span class="text-primary font-bold">SAVED</span>
+<span class="text-on-surface font-semibold">icon_sprite_vector.svg → WEBP (256x256)</span>
+<span class="text-on-surface-variant hidden sm:inline">(44 KB • SHA-256: b81d..a029)</span>
+</div>
+<span class="text-on-surface-variant">7 mins ago</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+// Dropzone Drag & Drop Visual State Handler
+const dropzone = document.getElementById('dropzone');
+if (dropzone) {
+['dragenter', 'dragover'].forEach(eventName => {
+dropzone.addEventListener(eventName, (e) => {
+e.preventDefault();
+dropzone.classList.add('bg-accent-light/20', 'border-primary', 'ring-2', 'ring-primary/40');
+}, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+dropzone.addEventListener(eventName, (e) => {
+e.preventDefault();
+dropzone.classList.remove('bg-accent-light/20', 'border-primary', 'ring-2', 'ring-primary/40');
+}, false);
+});
+}
+</script>
+</main>
+<footer class="w-full bg-surface border-t border-border-rule py-space-xl">
+<div class="w-full max-w-7xl mx-auto px-gutter-lg flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-mono-code text-mono-code text-on-surface-variant">RELAY // LOCAL RUNTIME</span>
+<span class="text-border-rule">|</span>
+<span class="font-mono-code text-mono-code text-on-surface-variant">WASM ENGINE v2.4</span>
+<span class="text-border-rule">|</span>
+<span class="font-mono-code text-mono-code text-primary font-semibold">CRYPTOGRAPHIC INTEGRITY GUARANTEED</span>
+</div>
+<div class="font-mono-code text-mono-code text-on-surface-variant">ZERO LOGS • ZERO UPLOADS • CLIENT-SIDE LOCAL EXECUTION ONLY</div>
+</div>
+</footer>
+</body></html>
+
+

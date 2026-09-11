@@ -1,0 +1,17 @@
+{
+  "name": "RELAY — Private In-Browser File Converter",
+  "short_name": "RELAY",
+  "description": "Convert files privately, right in your browser. Zero uploads.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f3f1",
+  "theme_color": "#a9473c",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
