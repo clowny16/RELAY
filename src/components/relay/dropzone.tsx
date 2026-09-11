@@ -1,19 +1,42 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueueStore } from "@/lib/store/queue-store";
 import { useUiStore } from "@/lib/store/ui-store";
+import { getFormat } from "@/lib/conversion/formats";
 import { toast } from "sonner";
-import { FileUp, FolderOpen, PlusCircle, ShieldCheck } from "lucide-react";
+import { CheckCircle2, FileUp, FolderOpen, Loader2, PlusCircle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Dropzone() {
   const addFiles = useQueueStore((s) => s.addFiles);
   const setView = useUiStore((s) => s.setView);
+  const scanning = useQueueStore((s) => s.scanning);
+  const jobs = useQueueStore((s) => s.jobs);
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
   const folderInput = useRef<HTMLInputElement>(null);
+
+  // File types currently sitting in the box: files still being detected plus
+  // every waiting (not yet converted) job grouped by its detected type.
+  const { scanningCount, typeSummary } = useMemo(() => {
+    const map = new Map<string, { label: string; count: number }>();
+    for (const j of jobs) {
+      if (j.status !== "waiting" && j.status !== "paused") continue;
+      const key = j.detection.formatId ?? "unknown";
+      const label = getFormat(j.detection.formatId)?.name ?? key.toUpperCase();
+      const entry = map.get(key);
+      if (entry) entry.count += 1;
+      else map.set(key, { label, count: 1 });
+    }
+    return { scanningCount: scanning.length, typeSummary: [...map.values()] };
+  }, [jobs, scanning.length]);
+
+  const scrollToFormats = useCallback(() => {
+    const target = document.querySelector('[data-testid="detect-panel"]') ?? document.querySelector('section[aria-label="Conversion queue"]');
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const handleFiles = useCallback(
     async (list: FileList | File[] | null) => {
@@ -149,6 +172,31 @@ export function Dropzone() {
           <ShieldCheck className="w-4 h-4 text-primary" aria-hidden />
           <span>100% private · Free · No sign-up · Works offline</span>
         </div>
+
+        {/* detected file types — shown right inside the box where files are chosen */}
+        {(scanningCount > 0 || typeSummary.length > 0) && (
+          <div className="flex flex-wrap items-center justify-center gap-1.5" data-testid="dropzone-file-types">
+            {scanningCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-accent-light/60 dark:bg-accent-light/20 border border-primary/25 text-primary">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden />
+                Detecting {scanningCount} file{scanningCount !== 1 ? "s" : ""}…
+              </span>
+            )}
+            {typeSummary.map((t) => (
+              <button
+                key={t.label}
+                onClick={scrollToFormats}
+                title="Jump to the format options"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-highlight text-highlight-foreground border border-highlight/60 hover:scale-105 transition-transform cursor-pointer"
+                data-testid="dropzone-type-chip"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />
+                {t.label}
+                <span className="opacity-70">× {t.count}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="pt-1 flex flex-wrap items-center justify-center gap-1.5">
           {["PDF", "Word", "Images", "Audio", "Video → GIF", "Archives", "Data", "eBooks", "Fonts"].map((pill) => (

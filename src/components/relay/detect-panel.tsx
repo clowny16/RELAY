@@ -15,8 +15,8 @@ import { useQueueStore, type ConversionJob, formatBytes } from "@/lib/store/queu
 import { getAvailableRoutes } from "@/lib/conversion/registry";
 import { CATEGORIES, getFormat } from "@/lib/conversion/formats";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2, ChevronRight, Loader2, Play, ScanSearch, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const MAX_CONFIRM_BYTES = 300 * 1024 * 1024;
@@ -146,30 +146,24 @@ export function DetectPanel() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-foreground w-full sm:w-auto">Convert to:</span>
-              {routes.map((r) => {
-                const selected = current === r.output;
-                return (
-                  <button
-                    key={r.output}
-                    onClick={() => setChoice((c) => ({ ...c, [formatId]: r.output }))}
-                    aria-pressed={selected}
-                    title={r.note ?? undefined}
-                    className={cn(
-                      "px-3.5 py-2 rounded-lg border font-mono text-sm font-semibold transition-all min-h-[40px]",
-                      selected
-                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                        : "bg-surface border-border hover:border-primary/50 hover:text-primary"
-                    )}
-                  >
-                    {r.output.toUpperCase()}
-                    {r.output === "jpg" ? " (smaller)" : r.output === "png" ? " (lossless)" : ""}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex justify-start sm:justify-end">
+              <span className="text-sm font-medium text-foreground">Convert to:</span>
+              <Select value={current} onValueChange={(v) => setChoice((c) => ({ ...c, [formatId]: v }))}>
+                <SelectTrigger
+                  className="w-full sm:w-[260px] h-10 text-sm font-semibold"
+                  aria-label={`Output format for ${label}`}
+                  data-testid={`format-select-${formatId}`}
+                >
+                  <SelectValue placeholder="Choose a format" />
+                </SelectTrigger>
+                <SelectContent>
+                  {routes.map((r) => (
+                    <SelectItem key={r.output} value={r.output} className="text-sm">
+                      <span className="font-mono font-bold">{r.output.toUpperCase()}</span>
+                      <span className="text-muted-foreground"> — {r.note ?? getFormat(r.output)?.name ?? "output format"}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button
                 size="sm"
                 className="min-h-[44px] px-5 text-sm font-bold gap-2 shadow-md"

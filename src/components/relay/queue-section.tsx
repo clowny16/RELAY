@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useQueueStore } from "@/lib/store/queue-store";
 import { JobCard } from "./job-card";
-import { Layers, Pause, Play, PlayCircle, Trash2, Archive, Inbox } from "lucide-react";
+import { Layers, Pause, Play, PlayCircle, Trash2, Archive, Inbox, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatBytes } from "@/lib/store/queue-store";
 import { toast } from "sonner";
@@ -10,6 +11,8 @@ import { cn } from "@/lib/utils";
 
 export function QueueSection() {
   const { jobs, filter, setFilter, paused, pauseAll, resumeAll, clearCompleted, downloadAll, startAll } = useQueueStore();
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
 
   const counts = {
     all: jobs.length,
@@ -32,7 +35,7 @@ export function QueueSection() {
       default:
         return true;
     }
-  });
+  }).filter((j) => q === "" || j.fileName.toLowerCase().includes(q));
 
   const totalBytes = jobs.reduce((a, j) => a + j.size, 0);
   const completedCount = counts.complete;
@@ -76,12 +79,47 @@ export function QueueSection() {
         )}
       </div>
 
+      {/* search — find files by name in big batches */}
+      {counts.all > 0 && (
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" aria-hidden />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search files by name…"
+            aria-label="Search files by name"
+            data-testid="queue-search"
+            className="w-full h-10 pl-9 pr-9 text-sm bg-surface border border-border rounded-lg placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-primary/40"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              aria-label="Clear search"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 min-h-[32px] min-w-[32px] flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-high transition-colors"
+            >
+              <X className="w-4 h-4" aria-hidden />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* empty state */}
       {counts.all === 0 && (
         <div className="bg-surface border border-dashed border-border rounded-xl p-10 flex flex-col items-center gap-2 text-center">
           <Inbox className="w-10 h-10 text-muted-foreground/40" aria-hidden />
           <div className="font-semibold">No files yet</div>
           <p className="text-sm text-muted-foreground">Drop files above to start converting — nothing gets uploaded.</p>
+        </div>
+      )}
+
+      {/* no search results */}
+      {counts.all > 0 && filtered.length === 0 && (
+        <div className="bg-surface border border-dashed border-border rounded-xl p-8 flex flex-col items-center gap-1.5 text-center">
+          <Search className="w-6 h-6 text-muted-foreground/40" aria-hidden />
+          <div className="text-sm font-semibold">No files match “{query}”</div>
+          <button className="text-xs text-primary font-semibold hover:underline" onClick={() => setQuery("")}>
+            Clear search
+          </button>
         </div>
       )}
 

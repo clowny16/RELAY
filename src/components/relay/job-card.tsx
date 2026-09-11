@@ -29,6 +29,8 @@ import {
   RotateCcw,
   Trash2,
   Eye,
+  Copy,
+  Repeat2,
   SlidersHorizontal,
   TrendingDown,
   Loader2,
@@ -118,7 +120,7 @@ function statusPill(job: ConversionJob) {
 }
 
 export function JobCard({ job }: { job: ConversionJob }) {
-  const { setTarget, setOption, startJob, cancelJob, retryJob, removeJob, downloadJob } = useQueueStore();
+  const { setTarget, setOption, startJob, cancelJob, retryJob, removeJob, downloadJob, cloneJob } = useQueueStore();
   const setPreviewJob = useUiStore((s) => s.setPreviewJob);
   const [advanced, setAdvanced] = useState(false);
   const fmt = getFormat(job.detection.formatId);
@@ -142,6 +144,27 @@ export function JobCard({ job }: { job: ConversionJob }) {
   const tryAnotherFormat = () => {
     setAdvanced(true);
     toast.info("Pick a different output format from the selector.");
+  };
+
+  const reconvert = () => {
+    if (cloneJob(job.id)) {
+      toast.success("File re-added — pick a new output format", { description: "Scroll down to the new card, choose a format and convert." });
+      setTimeout(() => {
+        document.querySelector('section[aria-label="Conversion queue"]')?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 60);
+    } else {
+      toast.error("Couldn't re-add this file", { description: "The batch limit may have been reached — clear finished files first." });
+    }
+  };
+
+  const copyOutput = async () => {
+    if (!job.result?.textPreview) return;
+    try {
+      await navigator.clipboard.writeText(job.result.textPreview);
+      toast.success("Output copied to clipboard");
+    } catch {
+      toast.error("Couldn't copy — your browser blocked clipboard access");
+    }
   };
 
   const optionsGrid = schema.length > 0 ? (
@@ -317,8 +340,30 @@ export function JobCard({ job }: { job: ConversionJob }) {
               <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => setPreviewJob(job.id)}>
                 <Eye className="w-3.5 h-3.5" aria-hidden /> Preview
               </Button>
+              {job.result?.textPreview && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5"
+                  onClick={() => void copyOutput()}
+                  title="Copy the output text to your clipboard"
+                  data-testid="copy-output"
+                >
+                  <Copy className="w-3.5 h-3.5" aria-hidden /> Copy
+                </Button>
+              )}
               <Button size="sm" className="h-8 text-xs font-bold gap-1.5" onClick={() => downloadJob(job.id)}>
                 <Download className="w-3.5 h-3.5" aria-hidden /> Save {job.result!.ext.toUpperCase()}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5 border-primary/30 text-primary"
+                onClick={reconvert}
+                title="Convert this file to a different format"
+                data-testid="reconvert"
+              >
+                <Repeat2 className="w-3.5 h-3.5" aria-hidden /> Again
               </Button>
             </>
           )}

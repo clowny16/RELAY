@@ -74,6 +74,7 @@ interface QueueState {
   cancelJob: (id: string) => void;
   retryJob: (id: string) => void;
   removeJob: (id: string) => void;
+  cloneJob: (id: string) => boolean;
   clearCompleted: () => void;
   pauseAll: () => void;
   resumeAll: () => void;
@@ -372,6 +373,39 @@ export const useQueueStore = create<QueueState>((set, get) => ({
     job?.runHandle?.cancel();
     if (job?.result?.url) URL.revokeObjectURL(job.result.url);
     set({ jobs: get().jobs.filter((j) => j.id !== id) });
+  },
+
+  /** Re-add a finished file as a fresh waiting job so the user can pick a
+   *  different output format. Non-destructive: the original stays untouched. */
+  cloneJob: (id) => {
+    const job = get().jobs.find((j) => j.id === id);
+    if (!job || !job.detection.formatId) return false;
+    const limits = deviceLimits();
+    const waiting = get().jobs.filter((j) => j.status === "waiting" || j.status === "paused").length;
+    if (waiting >= limits.maxBatch) return false;
+    const routes = getAvailableRoutes(job.detection.formatId);
+    if (routes.length === 0) return false;
+    // Suggest a different output than the one already produced, when possible.
+    const alt = routes.find((r) => r.output !== job.target)?.output ?? routes[0].output;
+    const route = getRoute(job.detection.formatId, alt)!;
+    set({
+      jobs: [
+        ...get().jobs,
+        {
+          id: `j${++jobCounter}-${Date.now()}`,
+          file: job.file,
+          fileName: job.fileName,
+          size: job.size,
+          detection: job.detection,
+          target: alt,
+          options: defaultOptions(route),
+          status: "waiting",
+          progress: 0,
+          stage: "queued",
+        },
+      ],
+    });
+    return true;
   },
 
   clearCompleted: () => {

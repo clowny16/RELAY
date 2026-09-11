@@ -80,3 +80,22 @@ Work Log:
 Stage Summary:
 - E2E verified via Agent Browser: upload CSV+TXT → panel listed both with live detecting rows → picked XLSX for CSV group → "Convert 1 to XLSX" ran ONLY that group (TXT stayed Waiting with visible pill) → picked MD for TXT → converted → both cards show yellow Done chips + Save buttons; history tray records both; footer flush at bottom
 - Light/dark verified (white #FFFFFF / black #111111 with orange+yellow accents), mobile 390px verified, lint + tsc clean, dev.log clean, zero console/hydration errors
+
+---
+Task ID: 5
+Agent: Z.ai Code (main)
+Task: (a) Show file type inside the file-chooser box; (b) format dropdown for choosing output; (c) add more features; (d) full UAT-style test pass of the whole app
+
+Work Log:
+- Dropzone: added live "file types in this box" strip inside the dropzone — yellow chips per detected type with counts ("CSV Data × 1") for waiting jobs + orange spinner chip while detection is running; chips scroll to the format panel on click
+- DetectPanel: output-format pills replaced with a proper shadcn Select dropdown per detected type — options show "<EXT> — <description>" (e.g. "XLSX — Excel Spreadsheet"), plus the "Convert N to <FMT>" button
+- New feature 1: queue search box ("Search files by name…") in Your Files with clear button and a "No files match" empty state
+- New feature 2: queue-store cloneJob(id) → re-adds a finished file as a fresh waiting job, suggesting a different output than the one already produced; JobCard "Again" button on completed cards with toast + auto-scroll
+- New feature 3: "Copy" button on completed cards for text outputs (result.textPreview) via clipboard API with success/failure toasts
+- UAT pass (Agent Browser, all ✅): fresh load zero errors; upload CSV/TXT/JSON/PNG → chips + 4 dropdown groups; dropdown pick XLSX → group-only convert; TXT→PDF, JSON→CSV, PNG→JPG (real image pipeline); Copy toast "Output copied to clipboard" + preview content verified (Ada/Alan/Grace JSON, SHA-256 shown); Again → clone waiting with JSON default → converted to test-data.json; search filter + no-results + clear; unsupported junk.xyz rejected with toast; real PNG renamed .csv → mismatch warning "file looks like a different type" with PNG badge; Pause → Convert All disabled → Resume → auto-drain; Convert All; Zip & Save All toast "relay-conversions.zip"; Done filter tab; Clear Finished → memory 0 B + empty state; history tray logs all conversions with sizes/timestamps; Tools & Archive view; Format Matrix view; Privacy view; ⌘K command palette filters ("csv to json" → CSV → JSON); offline badge "Offline — still works"; dark mode (pure black) light mode; mobile 390px chips + stacked dropdown; footer flush; zero console/page/dev.log errors
+- Note: agent-browser refs shuffle after re-renders — always re-snapshot before clicking (test-harness artifact, not an app bug); fill("") doesn't fire React onChange (use the Clear button)
+
+Stage Summary:
+- All requested UX: file types visible inside the chooser box + format dropdown post-detection
+- 3 new features shipped & verified: queue search, reconvert-to-another-format (Again), copy output
+- Full UAT across every view/flow/edge case passed with zero errors; app left in verified working state
