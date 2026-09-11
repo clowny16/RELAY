@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueueStore, type ConversionJob, formatBytes, outputName } from "@/lib/store/queue-store";
 import { getAvailableRoutes, getRoute } from "@/lib/conversion/registry";
 import { CATEGORIES, getFormat } from "@/lib/conversion/formats";
@@ -119,10 +119,39 @@ function statusPill(job: ConversionJob) {
   }
 }
 
+// throttle for "file is ready" toasts during fast batches (one per 3s max)
+let lastReadyToastAt = 0;
+
 export function JobCard({ job }: { job: ConversionJob }) {
   const { setTarget, setOption, startJob, cancelJob, retryJob, removeJob, downloadJob, cloneJob } = useQueueStore();
   const setPreviewJob = useUiStore((s) => s.setPreviewJob);
   const [advanced, setAdvanced] = useState(false);
+  const [justDone, setJustDone] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const prevStatus = useRef(job.status);
+
+  // The moment a job completes: pop the Save button, flash the card yellow,
+  // and (only if the card is off-screen) offer a "Show me" jump link.
+  useEffect(() => {
+    const becameComplete = prevStatus.current !== "complete" && job.status === "complete";
+    prevStatus.current = job.status;
+    if (!becameComplete) return;
+    setJustDone(true);
+    const el = cardRef.current;
+    const rect = el?.getBoundingClientRect();
+    const visible = !!rect && rect.top < window.innerHeight - 80 && rect.bottom > 80;
+    const now = Date.now();
+    if (!visible && now - lastReadyToastAt > 3000) {
+      lastReadyToastAt = now;
+      toast.success(`${outputName(job.fileName, job.result!.ext)} is ready`, {
+        description: "Converted on your device — hit the orange Save button to download.",
+        action: { label: "Show me", onClick: () => el?.scrollIntoView({ behavior: "smooth", block: "center" }) },
+      });
+    }
+    const t = setTimeout(() => setJustDone(false), 3000);
+    return () => clearTimeout(t);
+  }, [job.status, job.fileName, job.result]);
+
   const fmt = getFormat(job.detection.formatId);
   const routes = getAvailableRoutes(job.detection.formatId!);
   const route = getRoute(job.detection.formatId!, job.target);
@@ -230,7 +259,14 @@ export function JobCard({ job }: { job: ConversionJob }) {
   ) : null;
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 md:p-5 flex flex-col gap-3 shadow-sm" data-testid="job-card">
+    <div
+      ref={cardRef}
+      className={cn(
+        "bg-surface border border-border rounded-xl p-4 md:p-5 flex flex-col gap-3 shadow-sm transition-colors",
+        justDone && "border-highlight animate-card-flash"
+      )}
+      data-testid="job-card"
+    >
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         {/* left: file info */}
         <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -352,8 +388,16 @@ export function JobCard({ job }: { job: ConversionJob }) {
                   <Copy className="w-3.5 h-3.5" aria-hidden /> Copy
                 </Button>
               )}
-              <Button size="sm" className="h-8 text-xs font-bold gap-1.5" onClick={() => downloadJob(job.id)}>
-                <Download className="w-3.5 h-3.5" aria-hidden /> Save {job.result!.ext.toUpperCase()}
+              <Button
+                size="sm"
+                className={cn(
+                  "h-8 text-xs font-bold gap-1.5",
+                  justDone && "animate-save-pop animate-save-glow"
+                )}
+                onClick={() => downloadJob(job.id)}
+                data-testid="save-button"
+              >
+                <Download className={cn("w-3.5 h-3.5", justDone && "animate-icon-drop")} aria-hidden /> Save {job.result!.ext.toUpperCase()}
               </Button>
               <Button
                 variant="outline"

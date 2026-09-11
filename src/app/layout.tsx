@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "RELAY" }],
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icon.svg" },
+  icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
   openGraph: {
     title: "RELAY — Convert Files. Privately. Right in Your Browser.",
     description:

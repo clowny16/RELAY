@@ -99,3 +99,25 @@ Stage Summary:
 - All requested UX: file types visible inside the chooser box + format dropdown post-detection
 - 3 new features shipped & verified: queue search, reconvert-to-another-format (Again), copy output
 - Full UAT across every view/flow/edge case passed with zero errors; app left in verified working state
+
+---
+Task ID: 6
+Agent: Z.ai Code (main)
+Task: (a) New logo in header; (b) use the same logo as favicon; (c) make the download button pop/flash when a conversion finishes so users know where to download
+
+Work Log:
+- Designed a new RELAY brand mark: orange gradient rounded tile (#FF6A24→#FF4F00) + white double chevron (relay baton passing forward) + cyber-yellow dot (#FFD400) as the baton tip; legible at 16px
+- New shared component src/components/relay/logo.tsx (RelayMark, useId-safe gradient) — now used in the header (replaced the old generic Sparkles tile; w-8 rounded-lg, hover-scale, wordmark bumped to font-extrabold) and in the footer (small w-5 mark beside RELAY)
+- public/icon.svg overwritten with the same artwork — favicon, manifest icon and layout metadata icons (icon + shortcut + apple-touch-icon) all point to it, so header logo === favicon
+- public/sw.js cache bumped relay-v3 → relay-v4 so returning clients fetch the new icon/logo assets
+- Download-button attention effect in job-card.tsx: justDone state triggers on waiting→complete transition (3s window):
+  - Save button gets animate-save-pop (springy scale 0.55→1.14→1) + animate-save-glow (3 orange glow pulses) + animate-icon-drop (Download icon bounce)
+  - Card gets border-highlight + animate-card-flash (yellow ring flash) so the right card is findable in a batch
+  - If the finished card is OFF-SCREEN at completion: sonner toast "<output> is ready — hit the orange Save button" with a "Show me" action that smooth-scrolls to the card; throttled to 1 per 3s so fast batches don't spam
+- globals.css: added relay-save-pop/save-glow/card-flash/icon-drop keyframes + utility classes, all disabled under prefers-reduced-motion
+- Verified with Agent Browser: header logo renders light/dark/mobile-390px; /icon.svg served with new artwork; all 3 favicon <link> tags present; CSV→JSON convert captured mid-animation (Save button glowing+popped, card yellow ring); settled state clean after ~3s; off-screen conversion produced "uat-three.json is ready" toast, "Show me" click scrolled straight to the flashed card; zero console/page errors; fresh final load clean; lint + tsc clean
+
+Stage Summary:
+- Header logo and favicon are now the same custom RELAY mark (orange tile, double chevron, yellow dot) across light/dark/mobile
+- Conversion completion is unmissable: pop + glow on the Save button, yellow card flash, and an off-screen "Show me" jump toast — all reduced-motion safe
+- SW cache v4 ensures existing visitors get the new icon immediately

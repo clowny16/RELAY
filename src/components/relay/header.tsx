@@ -9,7 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Sun, Moon, Monitor, WifiOff, ShieldCheck, Sparkles } from "lucide-react";
+import { Search, Sun, Moon, Monitor, WifiOff, ShieldCheck } from "lucide-react";
+import { RelayMark } from "@/components/relay/logo";
 import { useEffect, useState } from "react";
 
 const NAV: { id: ViewId; label: string }[] = [
@@ -42,10 +43,8 @@ export function Header() {
       <div className="h-16 w-full px-4 lg:px-6 flex items-center justify-between gap-2">
         <div className="flex items-center gap-4 min-w-0">
           <button className="flex items-center gap-2 group shrink-0" onClick={() => setView("convert")} aria-label="RELAY home">
-            <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <Sparkles className="w-4.5 h-4.5 text-primary-foreground" aria-hidden />
-            </span>
-            <span className="font-bold text-lg tracking-tight text-foreground group-hover:text-primary transition-colors">RELAY</span>
+            <RelayMark className="w-8 h-8 rounded-lg shadow-sm group-hover:scale-105 group-active:scale-95 transition-transform" title="RELAY" />
+            <span className="font-extrabold text-lg tracking-tight text-foreground group-hover:text-primary transition-colors">RELAY</span>
           </button>
           <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent-light/50 dark:bg-accent-light/20 border border-primary/25">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" aria-hidden />

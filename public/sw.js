@@ -1,6 +1,6 @@
 /* RELAY service worker — cache the app shell for offline PWA use.
  * Conversion engines are bundled chunks cached on-demand (stale-while-revalidate). */
-const CACHE = "relay-v3";
+const CACHE = "relay-v4";
 const SHELL = ["/", "/icon.svg", "/manifest.webmanifest", "/pdfjs/pdf.worker.min.mjs"];
 
 self.addEventListener("install", (event) => {

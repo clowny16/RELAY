@@ -4,6 +4,7 @@ import { useQueueStore } from "@/lib/store/queue-store";
 import { formatBytes } from "@/lib/store/queue-store";
 import { History, ShieldCheck, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RelayMark } from "@/components/relay/logo";
 
 function timeAgo(at: number): string {
   const s = Math.floor((Date.now() - at) / 1000);
@@ -61,7 +62,10 @@ export function Footer() {
     <footer className="w-full bg-surface border-t border-border py-6 mt-auto">
       <div className="w-full max-w-7xl mx-auto px-4 lg:px-6 flex flex-col md:flex-row items-center justify-between gap-2">
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <span className="font-bold text-sm text-foreground">RELAY</span>
+          <span className="inline-flex items-center gap-1.5">
+            <RelayMark className="w-5 h-5 rounded-md" />
+            <span className="font-extrabold text-sm tracking-tight text-foreground">RELAY</span>
+          </span>
           <span className="text-border" aria-hidden>|</span>
           <span className="text-xs text-muted-foreground flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" aria-hidden />
