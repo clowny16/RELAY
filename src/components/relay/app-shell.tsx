@@ -14,6 +14,7 @@ import { FormatsView, PrivacyView } from "./info-views";
 import { useUiStore } from "@/lib/store/ui-store";
 import { toast } from "sonner";
 import { ArrowRight, X } from "lucide-react";
+import { FaqSection } from "./faq-section";
 import { formatLabel } from "@/lib/conversion/formats";
 
 function ConvertView() {
@@ -24,6 +25,7 @@ function ConvertView() {
       <DetectPanel />
       <QueueSection />
       <BentoGrid />
+      <FaqSection />
       <HistoryTray />
     </div>
   );
